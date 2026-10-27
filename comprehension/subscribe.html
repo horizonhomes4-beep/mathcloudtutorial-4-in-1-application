@@ -1,0 +1,147 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#155eef"><title>Student & School Subscription | MathCloud Tutorial</title><meta name="description" content="Register a student with MathCloud Tutorial. Select one or more annual learning programmes and send a formatted enrolment request on WhatsApp."><meta name="keywords" content="MathCloud subscription, school learning programmes, reading fluency subscription, spelling vocabulary, comprehension, maths quiz"><meta name="author" content="MathCloud Tutorial"><meta property="og:title" content="MathCloud Student & School Subscription"><meta property="og:description" content="Choose one or all four annual learning programmes. ₦10,000 per programme per year."><meta property="og:image" content="logo.png"><link rel="icon" type="image/png" sizes="any" href="logo.png"><link rel="shortcut icon" href="favicon.ico"><link rel="apple-touch-icon" href="logo.png"><link rel="stylesheet" href="site.css"></head><body><header class="nav"><a class="brand" href="index.html"><span class="mc-logo" aria-hidden="true"><i></i><i></i><i></i><img src="logo.png" alt=""></span><span>MathCloud <small>PROGRAMME ENROLMENT</small></span></a><nav class="navlinks"><a href="index.html">Home</a><a href="index.html">Student login</a></nav></header><main class="container form-shell"><section class="form-card"><span class="eyebrow">Parents · Students · Schools</span><h1>Build your learning subscription</h1><p class="help">Complete the learner details and select one, several, or all four programmes. Each programme costs <strong>₦10,000 per student per year</strong>. The total updates automatically.</p><form id="subscriptionForm"><div class="field-grid"><div class="field"><label for="studentName">Student full name *</label><input id="studentName" required autocomplete="name" placeholder="Full name"></div><div class="field"><label for="studentClass">Class / grade *</label><input id="studentClass" required placeholder="e.g. Primary 5"></div><div class="field"><label for="studentAge">Age *</label><input id="studentAge" required type="number" min="3" max="100" placeholder="Age in years"></div><div class="field"><label for="studentEmail">Email address *</label><input id="studentEmail" required type="email" autocomplete="email" placeholder="name@example.com"></div><div class="field"><label for="whatsApp">WhatsApp / phone number *</label><input id="whatsApp" required type="tel" autocomplete="tel" placeholder="e.g. 08012345678"></div><div class="field"><label for="schoolName">School name *</label><input id="schoolName" required placeholder="Name of school"></div><div class="field full"><label for="curriculum">Curriculum used by the school *</label><select id="curriculum" required><option value="">Select curriculum</option><option>Nigerian National Curriculum</option><option>British Curriculum</option><option>Montessori</option><option>American Curriculum</option><option>Cambridge</option><option>International Baccalaureate (IB)</option><option>School-specific / blended curriculum</option><option>Other</option></select></div></div><h3 style="margin:26px 0 5px">Select learning programmes</h3><p class="help">Tick every programme you want included in this enrolment.</p><div class="program-selects"><label class="program-option"><input type="checkbox" name="program" value="Reading Fluency"><span><b>🎙️ Reading Fluency</b><small>Guided oral reading and fluency review</small></span></label><label class="program-option"><input type="checkbox" name="program" value="Spelling and Vocabulary Enhancer"><span><b>🔤 Spelling & Vocabulary Enhancer</b><small>Word knowledge and spelling practice</small></span></label><label class="program-option"><input type="checkbox" name="program" value="Reading Comprehension"><span><b>📚 Reading Comprehension</b><small>Understand and respond to texts</small></span></label><label class="program-option"><input type="checkbox" name="program" value="Math Quiz"><span><b>➗ Math Quiz</b><small>Mathematics practice and quizzes</small></span></label></div><div class="totalbar"><div><strong id="totalCount">0</strong><div class="help">Selected programmes · annual total</div></div><strong id="totalCost">₦0</strong></div><p id="formError" role="alert" style="color:#b42318"></p><button class="btn primary" style="width:100%" type="submit">Prepare enrolment on WhatsApp →</button><p class="help" style="margin-top:13px">This form prepares a WhatsApp message; it does not charge a payment or activate an account. MathCloud will confirm enrolment and payment instructions.</p></form></section></main><footer class="footer"><span>© MathCloud Tutorial</span><a href="index.html">Back to home</a></footer><script>const fee=10000,boxes=[...document.querySelectorAll('input[name="program"]')];function updateTotal(){const n=boxes.filter(x=>x.checked).length;document.getElementById('totalCount').textContent=n;document.getElementById('totalCost').textContent=new Intl.NumberFormat('en-NG',{style:'currency',currency:'NGN',maximumFractionDigits:0}).format(n*fee)}boxes.forEach(x=>x.addEventListener('change',updateTotal));document.getElementById('subscriptionForm').addEventListener('submit',e=>{e.preventDefault();const err=document.getElementById('formError'),selected=boxes.filter(x=>x.checked).map(x=>x.value);err.textContent='';if(!selected.length){err.textContent='Please select at least one learning programme.';return}const val=id=>document.getElementById(id).value.trim();const name=val('studentName'),cls=val('studentClass'),age=val('studentAge'),email=val('studentEmail'),phone=val('whatsApp'),school=val('schoolName'),curr=val('curriculum');if(![name,cls,age,email,phone,school,curr].every(Boolean)){err.textContent='Please complete all required student and school details.';return}const money=new Intl.NumberFormat('en-NG',{style:'currency',currency:'NGN',maximumFractionDigits:0}).format(selected.length*fee);const message=`MATHCLOUD TUTORIAL — STUDENT / SCHOOL ENROLMENT REQUEST\n\nStudent name: ${name}\nClass / grade: ${cls}\nAge: ${age}\nEmail: ${email}\nWhatsApp / phone: ${phone}\nSchool: ${school}\nSchool curriculum: ${curr}\n\nSelected programmes (${selected.length}):\n${selected.map((p,i)=>`${i+1}. ${p} — ₦${fee.toLocaleString('en-NG')} per year`).join('\n')}\n\nAnnual total: ${money}\n\nPlease confirm the registration process, payment instructions, and next steps. Thank you.`;window.open('https://wa.me/2349129225442?text='+encodeURIComponent(message),'_blank','noopener,noreferrer')});updateTotal();</script><script>
+/* =========================================
+   WEBSITE PROTECTION
+   Blocks common browser shortcuts/devtools
+   ========================================= */
+
+(function () {
+    "use strict";
+
+    // Disable right-click
+    document.addEventListener("contextmenu", function (e) {
+        e.preventDefault();
+        return false;
+    });
+
+    // Disable common keyboard shortcuts
+    document.addEventListener("keydown", function (e) {
+        const key = e.key.toLowerCase();
+
+        // F12
+        if (e.key === "F12") {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+        }
+
+        // Ctrl shortcuts
+        if (e.ctrlKey) {
+
+            // Ctrl + U = View Source
+            if (key === "u") {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+
+            // Ctrl + S = Save Page
+            if (key === "s") {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+
+            // Ctrl + P = Print
+            if (key === "p") {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+
+            // Ctrl + C = Copy
+            if (key === "c") {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+
+            // Ctrl + X = Cut
+            if (key === "x") {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+
+            // Ctrl + A = Select All
+            if (key === "a") {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+
+            // Ctrl + Shift + I = Developer Tools
+            if (e.shiftKey && key === "i") {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+
+            // Ctrl + Shift + J = Console
+            if (e.shiftKey && key === "j") {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+
+            // Ctrl + Shift + C = Inspect Element
+            if (e.shiftKey && key === "c") {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+        }
+
+        // F1 / F3 / F6 / F10 / F11
+        if (
+            e.key === "F1" ||
+            e.key === "F3" ||
+            e.key === "F6" ||
+            e.key === "F10" ||
+            e.key === "F11"
+        ) {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+        }
+
+        // Shift + F10 = Context Menu
+        if (e.shiftKey && e.key === "F10") {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+        }
+    }, true);
+
+    // Disable text selection
+    document.addEventListener("selectstart", function (e) {
+        e.preventDefault();
+        return false;
+    });
+
+    // Disable dragging images/elements
+    document.addEventListener("dragstart", function (e) {
+        e.preventDefault();
+        return false;
+    });
+
+    // Disable copy
+    document.addEventListener("copy", function (e) {
+        e.preventDefault();
+        return false;
+    });
+
+    // Disable cut
+    document.addEventListener("cut", function (e) {
+        e.preventDefault();
+        return false;
+    });
+
+    // Disable paste if desired
+    document.addEventListener("paste", function (e) {
+        // Comment this section out if users need to paste
+        e.preventDefault();
+        return false;
+    });
+
+})();
+</script></body></html>

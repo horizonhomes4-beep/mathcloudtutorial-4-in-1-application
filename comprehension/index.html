@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Reading Comprehension | MathCloud Tutorial</title><meta name="theme-color" content="#155eef"><meta name="robots" content="noindex,follow">
+<link rel="icon" type="image/png" sizes="any" href="logo.png"><link rel="shortcut icon" href="favicon.ico"><link rel="apple-touch-icon" href="logo.png">
+<link rel="stylesheet" href="site.css"><link rel="stylesheet" href="comprehension.css"></head>
+<body class="mq">
+<header class="nav"><a class="brand" href="index.html"><span class="mc-logo" aria-hidden="true"><i></i><i></i><i></i><img src="logo.png" alt=""></span><span>MathCloud <small>READING COMPREHENSION</small></span></a><nav class="navlinks"><a href="subscribe.html">Subscription</a><button id="logoutBtn" class="btn hidden" type="button" style="padding:9px 16px">Sign out</button></nav></header>
+<main class="mq-wrap">
+<section id="loginView" class="mq-login">
+ <div class="mq-card mq-intro"><img src="mathcloud-human-guide.png" alt="Coach Reed"><div><span class="eyebrow">Meet your guide</span><h2>Hi, I’m Coach Reed 👋</h2>
+  <p>I will read a passage aloud. Listen carefully, tap any highlighted word to hear its meaning, then answer the multiple-choice questions. At the end I show every answer with an explanation and tell you which reading skills to practise. You can try the free demo without an account.</p>
+  <button id="introBtn" class="btn primary" type="button">🔊 Hear my introduction</button>
+  <ul class="mq-feat"><li>🎧 Passage read aloud</li><li>📖 Every hard word explained</li><li>✅ Multiple-choice questions</li><li>📈 Skill analysis</li></ul></div></div>
+ <div class="mq-card"><span class="eyebrow">Reading Comprehension</span><h1 style="font-size:clamp(30px,5vw,40px);letter-spacing:-.04em;line-height:1.1;margin:10px 0">Listen. Understand. Answer.</h1>
+  <p class="mq-muted">Sign in with the email and password created by your teacher. One device is allowed at a time.</p>
+  <form id="loginForm" class="mq-form" autocomplete="on"><div><label for="studentEmail">Student email</label><input id="studentEmail" type="email" required autocomplete="username" placeholder="name@example.com"></div><div><label for="studentPassword">Password</label><input id="studentPassword" type="password" required autocomplete="current-password" placeholder="Your password"></div><button class="btn primary" type="submit" style="width:100%">Sign in to reading</button><p id="loginError" class="mq-msg" role="alert"></p></form>
+  <button id="demoLoginBtn" class="btn" type="button" style="width:100%;margin-top:10px">Try the free demo — sign in automatically</button><div class="noticebox"><strong>Free demo</strong><br>Opens sample passages and questions. Demo scores are not saved.</div><p class="mq-muted">Need to change devices? <a href="https://wa.me/2349129225442?text=I%20need%20help%20changing%20my%20MathCloud%20Reading%20Comprehension%20device" target="_blank" rel="noopener">Contact the administrator on WhatsApp</a>.</p></div>
+</section>
+<section id="dashView" class="hidden">
+ <div class="mq-head"><div><span class="eyebrow">Your reading space</span><h1>Hello, <span id="studentName">Learner</span></h1><p class="mq-muted" id="bankInfo"></p><p class="mq-muted" id="devNote"></p></div></div>
+ <div id="subCard" class="mq-card cp-sub hidden" style="margin-bottom:18px"><div class="cp-sub-top"><div><span class="eyebrow">Your subscription</span><h2 id="subTitle">Subscription</h2><p class="mq-muted" id="subNote"></p></div><span id="subBadge" class="cp-sub-badge"></span></div><div id="subClock" class="cp-clock hidden" role="timer" aria-label="Time left on your subscription"><div><b id="cdD">0</b><span>days</span></div><div><b id="cdH">00</b><span>hours</span></div><div><b id="cdM">00</b><span>minutes</span></div><div><b id="cdS">00</b><span>seconds</span></div></div><div id="subBarWrap" class="cp-sub-bar hidden"><i id="subBar"></i></div><p class="mq-muted" id="subDates"></p><a id="subWa" class="btn primary hidden" href="https://wa.me/2349129225442?text=I%20want%20to%20activate%20or%20renew%20my%20MathCloud%20Reading%20Comprehension%20subscription" target="_blank" rel="noopener">Activate / renew on WhatsApp</a></div>
+ <div class="mq-metrics"><div class="mq-metric"><span>Tests taken</span><strong id="mTaken">0</strong></div><div class="mq-metric"><span>Average score</span><strong id="mAvg">—</strong></div><div class="mq-metric"><span>Best score</span><strong id="mBest">—</strong></div><div class="mq-metric"><span>Questions answered</span><strong id="mAns">0</strong></div></div>
+ <div class="mq-card" style="margin-bottom:18px"><h2>Your passages</h2><div id="plist"></div></div>
+ <div class="mq-card" style="margin-bottom:18px"><h2>Your reading skills</h2><p class="mq-muted" id="skLead"></p><div id="skills"></div></div>
+ <div class="mq-card"><h2>Recent tests</h2><div id="history"><p class="mq-muted">Finished tests appear here.</p></div></div>
+</section>
+<section id="readView" class="hidden">
+ <div class="mq-top"><button id="leaveBtn" class="btn" type="button" style="padding:9px 16px">← Leave</button><div class="grow"><h2 id="pTitle"></h2></div></div>
+ <div class="mq-sheet"><div class="cp-pl"><button id="playBtn" class="btn primary" type="button">🎧 Listen to the passage</button><button id="stopBtn" class="btn" type="button">⏹ Stop</button><button id="wordsBtn" class="btn" type="button">📖 Explain the words</button><select id="speed" aria-label="Reading speed" class="mq-in"><option value=".75">Slow</option><option value=".9" selected>Normal</option><option value="1.05">Fast</option></select><button id="txtBtn" class="btn" type="button">👁 Show / hide text</button></div>
+  <div id="ptext" class="cp-text"></div>
+  <h3>Words to know</h3><div id="gloss" class="cp-gl"></div>
+  <div class="sp-sub"><button id="startQ" class="btn primary" type="button">I’m ready for the questions →</button></div></div>
+</section>
+<section id="quizView" class="hidden" aria-live="polite">
+ <div class="mq-top"><button id="backRead" class="btn" type="button" style="padding:9px 16px">← Back to passage</button><div class="grow"><h2 id="qTitle"></h2></div><span class="mq-timer" id="timer">00:00</span></div>
+ <div class="mq-bar"><i id="bar"></i></div>
+ <div class="mq-sheet"><div class="mq-count"><span id="counter"></span><span id="skTag"></span></div>
+  <div class="cp-pl"><button id="qHear" class="btn" type="button">🔊 Read question</button><button id="qReplay" class="btn" type="button">🎧 Hear passage again</button></div>
+  <div id="qText" class="cp-q"></div><div id="opts" class="cp-opts" role="radiogroup"></div>
+  <div class="sp-sub"><button id="prevBtn" class="btn" type="button">← Previous</button><button id="nextBtn" class="btn primary" type="button">Next →</button></div><p id="qMsg" class="mq-msg" role="alert"></p></div>
+</section>
+<section id="resultView" class="hidden"><div class="mq-card"><div class="mq-result"><div class="mq-ring" id="ring"><div id="ringTxt">0%</div></div>
+ <div><span class="eyebrow">Your results</span><h2 id="resTitle" style="font-size:28px;margin:6px 0"></h2><p id="resSub" class="mq-muted"></p>
+ <div class="actions" style="margin:16px 0 0"><button id="againBtn" class="btn primary" type="button">Try again</button><button id="homeBtn" class="btn" type="button">Back to dashboard</button><button id="sayBtn" class="btn" type="button">🔊 Explain my result</button></div><p id="saveMsg" class="mq-msg"></p></div></div>
+ <h3 style="margin:26px 0 10px">Skills in this test</h3><div id="resSk"></div>
+ <h3 style="margin:26px 0 0">Review every question</h3><div id="review"></div></div></section>
+</main>
+<aside class="mq-dock" id="dock" aria-label="Reading coach"><div class="av"><img src="mathcloud-human-guide.png" alt="Coach Reed"></div><div><strong>Coach Reed</strong><p id="dockSays">Welcome! I am Coach Reed. Let us practise reading comprehension together.</p><div class="dk-act"><button id="dockReplay" type="button">🔊 Replay</button></div></div></aside>
+<footer class="footer"><span>© MathCloud Tutorial</span><a href="subscribe.html">Subscription</a></footer>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="firebase-config.js"></script><script src="comprehension-seed.js"></script><script src="comprehension.js"></script>
+<script>
+/* =========================================
+   WEBSITE PROTECTION
+   Blocks common browser shortcuts/devtools
+   ========================================= */
+
+(function () {
+    "use strict";
+
+    // Disable right-click
+    document.addEventListener("contextmenu", function (e) {
+        e.preventDefault();
+        return false;
+    });
+
+    // Disable common keyboard shortcuts
+    document.addEventListener("keydown", function (e) {
+        const key = e.key.toLowerCase();
+
+        // F12
+        if (e.key === "F12") {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+        }
+
+        // Ctrl shortcuts
+        if (e.ctrlKey) {
+
+            // Ctrl + U = View Source
+            if (key === "u") {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+
+            // Ctrl + S = Save Page
+            if (key === "s") {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+
+            // Ctrl + P = Print
+            if (key === "p") {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+
+            // Ctrl + C = Copy
+            if (key === "c") {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+
+            // Ctrl + X = Cut
+            if (key === "x") {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+
+            // Ctrl + A = Select All
+            if (key === "a") {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+
+            // Ctrl + Shift + I = Developer Tools
+            if (e.shiftKey && key === "i") {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+
+            // Ctrl + Shift + J = Console
+            if (e.shiftKey && key === "j") {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+
+            // Ctrl + Shift + C = Inspect Element
+            if (e.shiftKey && key === "c") {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+        }
+
+        // F1 / F3 / F6 / F10 / F11
+        if (
+            e.key === "F1" ||
+            e.key === "F3" ||
+            e.key === "F6" ||
+            e.key === "F10" ||
+            e.key === "F11"
+        ) {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+        }
+
+        // Shift + F10 = Context Menu
+        if (e.shiftKey && e.key === "F10") {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+        }
+    }, true);
+
+    // Disable text selection
+    document.addEventListener("selectstart", function (e) {
+        e.preventDefault();
+        return false;
+    });
+
+    // Disable dragging images/elements
+    document.addEventListener("dragstart", function (e) {
+        e.preventDefault();
+        return false;
+    });
+
+    // Disable copy
+    document.addEventListener("copy", function (e) {
+        e.preventDefault();
+        return false;
+    });
+
+    // Disable cut
+    document.addEventListener("cut", function (e) {
+        e.preventDefault();
+        return false;
+    });
+
+    // Disable paste if desired
+    document.addEventListener("paste", function (e) {
+        // Comment this section out if users need to paste
+        e.preventDefault();
+        return false;
+    });
+
+})();
+</script></body></html>

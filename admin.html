@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#123a72">
+  <title>MathCloud Tutorial | Programme Navigation</title>
+  <style>
+    :root {
+      --blue: #123a72;
+      --blue2: #1769aa;
+      --gold: #f4bd43;
+      --ink: #172b4d;
+      --muted: #61718a;
+      --surface: #ffffff;
+      --background: #f3f7fc;
+      --border: #e1e9f3;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: Inter, "Segoe UI", Arial, sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 8% 0%, rgba(244,189,67,.17), transparent 26rem),
+        radial-gradient(circle at 100% 10%, rgba(23,105,170,.12), transparent 30rem),
+        var(--background);
+      min-height: 100vh;
+    }
+    a { color: inherit; }
+    .topbar {
+      background: var(--blue);
+      color: #fff;
+      padding: 17px 22px;
+      box-shadow: 0 5px 20px rgba(18,58,114,.15);
+    }
+    .topbar-inner {
+      width: min(1120px, 100%);
+      margin: auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .brand { font-size: 1.08rem; font-weight: 800; letter-spacing: .2px; }
+    .brand span { color: var(--gold); }
+    .top-label {
+      font-size: .82rem; color: #dbe8fa; border: 1px solid #52739f;
+      border-radius: 999px; padding: 7px 12px;
+    }
+    main { width: min(1120px, calc(100% - 32px)); margin: 0 auto; }
+    .hero { padding: 54px 0 28px; text-align: center; }
+    .eyebrow {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: #fff5d9; color: #78530b; border: 1px solid #f5df9e;
+      padding: 8px 13px; border-radius: 999px; font-weight: 750;
+      font-size: .78rem; text-transform: uppercase; letter-spacing: .7px;
+    }
+    h1 { margin: 18px 0 12px; font-size: clamp(2rem, 5vw, 3.25rem); line-height: 1.1; color: var(--blue); }
+    h1 em { color: #c48a12; font-style: normal; }
+    .intro { max-width: 710px; margin: 0 auto; line-height: 1.75; color: var(--muted); font-size: 1.03rem; }
+    .quick-info {
+      display: flex; justify-content: center; flex-wrap: wrap; gap: 10px;
+      margin: 25px 0 0;
+    }
+    .quick-info span {
+      background: rgba(255,255,255,.8); border: 1px solid var(--border);
+      border-radius: 999px; padding: 9px 13px; color: #405572; font-size: .86rem;
+    }
+    .section-head { text-align: center; padding: 22px 0 24px; }
+    .section-head h2 { margin: 0 0 9px; font-size: clamp(1.45rem, 3vw, 2rem); color: var(--blue); }
+    .section-head p { margin: 0; color: var(--muted); line-height: 1.6; }
+    .grid4 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px; padding-bottom: 42px; }
+    .program {
+      --accent: #1769aa;
+      position: relative; display: flex; flex-direction: column; align-items: flex-start;
+      min-height: 285px; padding: 23px 20px 20px; background: var(--surface);
+      border: 1px solid var(--border); border-radius: 20px;
+      box-shadow: 0 10px 28px rgba(31,63,103,.07);
+      transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+      overflow: hidden;
+    }
+    .program::before { content: ""; position: absolute; inset: 0 0 auto; height: 5px; background: var(--accent); }
+    .program:hover, .program:focus-within {
+      transform: translateY(-5px); box-shadow: 0 17px 35px rgba(31,63,103,.13); border-color: #b7cce5;
+    }
+    .program:nth-child(2) { --accent: #a34bca; }
+    .program:nth-child(3) { --accent: #16866c; }
+    .program:nth-child(4) { --accent: #d39418; }
+    .picon {
+      width: 58px; height: 58px; display: grid; place-items: center;
+      border-radius: 17px; background: color-mix(in srgb, var(--accent) 11%, white);
+      font-size: 1.8rem; margin-bottom: 17px;
+    }
+    .program h3 { margin: 0 0 10px; color: var(--blue); font-size: 1.12rem; }
+    .program p { margin: 0 0 20px; color: var(--muted); font-size: .91rem; line-height: 1.65; flex: 1; }
+    .program-link {
+      display: flex; width: 100%; min-height: 46px; align-items: center; justify-content: center; gap: 8px;
+      padding: 12px 14px; background: var(--accent); color: white; text-decoration: none;
+      border-radius: 12px; font-size: .9rem; font-weight: 750;
+      transition: filter .2s ease, transform .2s ease;
+    }
+    .program-link:hover { filter: brightness(.92); }
+    .program-link:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
+    .footer {
+      text-align: center; padding: 20px 12px 30px; color: #75849a; font-size: .82rem;
+    }
+    .footer strong { color: var(--blue); }
+    @media (max-width: 950px) { .grid4 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+    @media (max-width: 560px) {
+      .topbar { padding: 15px 16px; }
+      .top-label { display: none; }
+      main { width: min(100% - 24px, 440px); }
+      .hero { padding-top: 38px; }
+      .grid4 { grid-template-columns: 1fr; gap: 14px; }
+      .program { min-height: 0; }
+      .program p { margin-bottom: 18px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">MathCloud <span>Tutorial</span></div>
+      <div class="top-label">Programme Navigation</div>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero" id="home">
+      <span class="eyebrow">Your learning journey starts here</span>
+      <h1>Choose a programme.<br><em>Keep growing.</em></h1>
+      <p class="intro">
+        Welcome to MathCloud Tutorial. Open any learning programme below using its button.
+        Each button links directly to the existing programme page, so the programme's own
+        sign-in, activities, and learner pages remain separate.
+      </p>
+      <div class="quick-info" aria-label="Learning benefits">
+        <span>🎯 Focused practice</span>
+        <span>🎧 Guided activities</span>
+        <span>📈 Progress-focused learning</span>
+      </div>
+    </section>
+
+    <section id="programmes" aria-labelledby="programmes-title">
+      <div class="section-head">
+        <h2 id="programmes-title">Open a learning programme</h2>
+        <p>Select one of the four buttons to go to the respective page.</p>
+      </div>
+
+      <div class="grid4">
+        <article class="program reveal" id="reading-fluency">
+          <div class="picon" aria-hidden="true">🎙️</div>
+          <h3>Reading Fluency</h3>
+          <p>Practise reading with guided support, listen to passages, build confidence, and review reading performance.</p>
+          <a class="program-link btn primary" href="reading-fluency/index.html">Open Reading Fluency <span aria-hidden="true">→</span></a>
+        </article>
+
+        <article class="program reveal" id="spelling-vocabulary">
+          <div class="picon" aria-hidden="true">🔤</div>
+          <h3>Spelling &amp; Vocabulary</h3>
+          <p>Listen to words, practise spelling, explore definitions, and learn how words are used in context.</p>
+          <a class="program-link btn primary" href="spelling-bee/index.html">Open Spelling &amp; Vocabulary <span aria-hidden="true">→</span></a>
+        </article>
+
+        <article class="program reveal" id="reading-comprehension">
+          <div class="picon" aria-hidden="true">📖</div>
+          <h3>Reading Comprehension</h3>
+          <p>Read or listen to passages, develop understanding, answer questions, and learn from feedback.</p>
+          <a class="program-link btn primary" href="comprehension/index.html">Open Comprehension <span aria-hidden="true">→</span></a>
+        </article>
+
+        <article class="program reveal" id="maths-quiz">
+          <div class="picon" aria-hidden="true">➗</div>
+          <h3>Maths Quiz</h3>
+          <p>Strengthen mathematical thinking with topic-based quizzes, practice, and feedback to guide improvement.</p>
+          <a class="program-link btn primary" href="math-quiz/index.html">Open Maths Quiz <span aria-hidden="true">→</span></a>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <strong>MathCloud Tutorial</strong> · Learn at your pace. Practise with purpose.
+  </footer>
+</body>
+</html>

@@ -1,0 +1,34 @@
+/* Professional layer: load LAST. Fonts: Plus Jakarta Sans (UI) + Lexend (reading, designed for fluency) */
+body.mq,body.mq button,body.mq input,body.mq select{font-family:'Plus Jakarta Sans',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
+body.mq h1,body.mq h2,body.mq h3{letter-spacing:-.025em}
+body.mq .passage-text{font-family:'Lexend','Plus Jakarta Sans',system-ui,sans-serif;font-size:clamp(19px,2.3vw,25px);line-height:1.95;letter-spacing:.01em;word-spacing:.08em}
+.hidden{display:none!important}
+.rf-act{display:grid;gap:3px;min-width:190px;padding:9px 14px;border-radius:14px;border:1px solid #cfe0ff;background:#eef4ff;color:#12336d}
+.rf-act small{font-size:10.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;opacity:.75}
+.rf-act b{font-size:15px;font-variant-numeric:tabular-nums;letter-spacing:0}
+.rf-act i{display:block;height:5px;border-radius:9px;background:#d9e6fb;overflow:hidden}.rf-act u{display:block;height:100%;background:#175cd3;border-radius:9px;transition:width 1s linear}
+.rf-act.ok{background:#ecfdf3;border-color:#a6f4c5;color:#085d3a}.rf-act.ok u{background:#12b76a}
+.rf-act.warn{background:#fffaeb;border-color:#fedf89;color:#7a4a00}.rf-act.warn u{background:#f79009}
+.rf-act.bad{background:#fef3f2;border-color:#fecdca;color:#912018}.rf-act.bad u{background:#f04438}
+.rf-act.demo{background:#f4f3ff;border-color:#d9d6fe;color:#3e1c96}
+.rf-note{margin:0 0 14px;padding:12px 16px;border-radius:14px;background:#fffaeb;border:1px solid #fedf89;color:#7a4a00;font-size:13.5px}
+.rf-modal{position:fixed;inset:0;z-index:300;display:grid;place-items:center;padding:20px;background:rgba(18,35,63,.66);backdrop-filter:blur(6px)}
+.rf-card{width:min(440px,100%);padding:30px 26px;border-radius:26px;background:#fff;text-align:center;box-shadow:0 30px 80px rgba(10,25,55,.35);animation:rfPop .25s ease}
+.rf-card h2{margin:6px 0 8px;font-size:21px}.rf-card p{color:#475467;font-size:14px;line-height:1.55}
+.rf-card .btn.full{display:block;width:100%;margin-top:14px;text-align:center}
+.rf-ico{width:70px;height:70px;margin:0 auto 8px;display:grid;place-items:center;border-radius:22px;background:linear-gradient(145deg,#fff1d6,#ffd68a);font-size:32px}
+.rf-msg{min-height:20px;font-size:13px;font-weight:700}.rf-msg.good{color:#087443}.rf-msg.bad{color:#b42318}.rf-msg.wait{color:#175cd3}
+@keyframes rfPop{from{opacity:0;transform:translateY(10px) scale(.97)}}
+/* Coach Reed: breathing idle, speaking ring + voice bars, attention pulse until the first tap */
+body.mq .mq-dock .av{position:relative;animation:rfBreath 4.2s ease-in-out infinite}
+body.mq .mq-dock.speaking .av::after{content:'';position:absolute;left:50%;bottom:4px;width:26px;height:10px;transform:translateX(-50%);background:
+ linear-gradient(#175cd3,#175cd3) 0 100%/4px 40% no-repeat,linear-gradient(#175cd3,#175cd3) 7px 100%/4px 90% no-repeat,linear-gradient(#175cd3,#175cd3) 14px 100%/4px 60% no-repeat,linear-gradient(#175cd3,#175cd3) 21px 100%/4px 80% no-repeat;animation:rfBars .5s steps(4) infinite alternate;opacity:.85}
+body.mq .mq-dock.attention{animation:rfNudge 1.2s ease-in-out infinite;box-shadow:0 0 0 3px #f7900955,0 16px 50px #142b4d22}
+@keyframes rfBreath{50%{transform:translateY(-2px) scale(1.015)}}
+@keyframes rfBars{to{background-size:4px 90%,4px 35%,4px 85%,4px 45%}}
+@keyframes rfNudge{50%{transform:translateY(-5px)}}
+@media(max-width:640px){body.mq .mq-dock{width:auto;max-width:calc(100vw - 24px);right:12px;left:12px}.rf-act{width:100%}}
+@media(prefers-reduced-motion:reduce){body.mq .mq-dock .av,.mq-dock.attention,.rf-card{animation:none!important}}
+/* Admin: unlock requests */
+.rf-req{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:12px 14px;margin:8px 0;border:1px solid #fedf89;border-radius:14px;background:#fffaeb}
+.rf-req small{display:block;color:#667085}.rf-badge{display:inline-block;padding:2px 8px;border-radius:99px;background:#fef0c7;color:#7a4a00;font-size:11px;font-weight:800}

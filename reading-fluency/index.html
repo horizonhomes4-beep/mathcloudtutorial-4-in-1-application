@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Reading Fluency | MathCloud Tutorial</title><meta name="description" content="Listen to a passage, read it aloud, and get clear feedback on pace and word accuracy with Coach Reed."><meta name="theme-color" content="#155eef"><meta name="robots" content="noindex,follow">
+<link rel="icon" type="image/png" sizes="any" href="logo.png"><link rel="shortcut icon" href="favicon.ico"><link rel="apple-touch-icon" href="logo.png">
+<link rel="stylesheet" href="site.css"><link rel="stylesheet" href="fluency-home.css"></head>
+<body class="mq">
+<header class="nav"><a class="brand" href="index.html"><span class="mc-logo" aria-hidden="true"><i></i><i></i><i></i><img src="logo.png" alt=""></span><span>MathCloud <small>READING FLUENCY</small></span></a><nav class="navlinks"><a href="subscribe.html">Subscription</a></nav></header>
+<main class="mq-wrap">
+<section id="loginView" class="mq-login">
+ <div class="mq-card mq-intro"><img src="mathcloud-human-guide.png" alt="Coach Reed"><div><span class="eyebrow">Meet your guide</span><h2>Hi, I’m Coach Reed 👋</h2>
+  <p>I will help you become a smoother, more confident reader. Listen to a passage, then read it aloud while I follow along with the microphone. At the end I show your reading pace and word accuracy, and we practise every tricky word together. You can try the free demo without an account.</p>
+  <button id="introBtn" class="btn primary" type="button">🔊 Hear my introduction</button>
+  <ul class="mq-feat"><li>🎧 Passage read aloud</li><li>🎤 Read aloud to the microphone</li><li>⏱ Reading pace (WPM)</li><li>🔁 Practise missed words</li></ul></div></div>
+ <div class="mq-card"><span class="eyebrow">Reading Fluency</span><h1 style="font-size:clamp(30px,5vw,40px);letter-spacing:-.04em;line-height:1.1;margin:10px 0">Listen. Read aloud. Improve.</h1>
+  <p class="mq-muted">Sign in with the email and password created by your teacher. One device is allowed at a time.</p>
+  <form id="loginForm" class="mq-form" autocomplete="on"><div><label for="studentEmail">Student email</label><input id="studentEmail" type="email" required autocomplete="username" placeholder="name@example.com"></div><div><label for="studentPassword">Password</label><input id="studentPassword" type="password" required autocomplete="current-password" placeholder="Your password"></div><button class="btn primary" type="submit" style="width:100%">Sign in to reading</button><p id="loginError" class="mq-msg" role="alert"></p></form>
+  <button id="demoLoginBtn" class="btn" type="button" style="width:100%;margin-top:10px">Try the free demo — sign in automatically</button><div class="noticebox"><strong>Free demo</strong><br>Opens sample passages to read aloud. Demo scores are not saved. Use Chrome or Edge and allow the microphone.</div><p class="mq-muted">Need to change devices? <a href="https://wa.me/2349129225442?text=I%20need%20help%20changing%20my%20MathCloud%20Reading%20Fluency%20device" target="_blank" rel="noopener">Contact the administrator on WhatsApp</a>.</p></div>
+</section>
+</main>
+<aside class="mq-dock" id="dock" aria-label="Reading coach"><div class="av"><img src="mathcloud-human-guide.png" alt="Coach Reed"></div><div><strong>Coach Reed</strong><p id="dockSays">Welcome! I am Coach Reed. Let us practise reading aloud together.</p><div class="dk-act"><button id="dockReplay" type="button">🔊 Replay</button></div></div></aside>
+<footer class="footer"><span>© MathCloud Tutorial</span><a href="subscribe.html">Subscription</a></footer>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script><script src="firebase-config.js"></script>
+<script>
+(function(){
+const $=id=>document.getElementById(id);
+/* ---------- Coach Reed voice ---------- */
+const TTS='speechSynthesis'in window;let voice=null,sid=0;
+function pick(){const v=speechSynthesis.getVoices().filter(x=>/^en/i.test(x.lang));if(!v.length)return null;const sc=x=>{const n=x.name;let s=0;if(/natural|neural|online/i.test(n))s+=100;if(/aria|jenny|sonia|libby|ava|emma|samantha|karen|serena|moira|tessa|zira|hazel|susan|female/i.test(n))s+=60;if(/google uk english female|google us english/i.test(n))s+=50;if(/\b(male|david|mark|guy|ryan|daniel|george|alex|fred|james)\b/i.test(n)&&!/female/i.test(n))s-=200;if(/en-NG/i.test(x.lang))s+=20;else if(/en-GB/i.test(x.lang))s+=15;else if(/en-US/i.test(x.lang))s+=10;return s;};return v.map(x=>[x,sc(x)]).sort((a,b)=>b[1]-a[1])[0][0];}
+if(TTS){speechSynthesis.onvoiceschanged=()=>{voice=pick();};voice=pick();}
+let last='';
+function say(t){last=t;$('dockSays').textContent=t;if(!TTS)return;const id=++sid;speechSynthesis.cancel();const dock=$('dock');
+ const parts=(t.match(/[^.!?]+[.!?]*/g)||[t]).map(s=>s.trim()).filter(Boolean);let left=parts.length;dock.classList.add('speaking');
+ const done=()=>{if(id===sid&&--left<=0)dock.classList.remove('speaking');};voice=voice||pick();
+ parts.forEach(p=>{const u=new SpeechSynthesisUtterance(p);if(voice){u.voice=voice;u.lang=voice.lang;}u.rate=.95;u.onend=done;u.onerror=done;speechSynthesis.speak(u);});}
+const INTRO='Hi, I am Coach Reed. Sign in with the email and password from your teacher, or try the free demo. Then listen to a passage, read it aloud into the microphone, and I will show your reading pace and word accuracy. We will practise every tricky word together.';
+$('introBtn').onclick=()=>say(INTRO);$('dockReplay').onclick=()=>say(last||INTRO);
+window.addEventListener('pagehide',()=>{if(TTS)speechSynthesis.cancel();});
+/* ---------- Sign in ---------- */
+const form=$('loginForm'),err=$('loginError');
+function msg(t){err.textContent=t||'';}
+if(window.firebase&&window.FIREBASE_CONFIG){
+ try{if(!firebase.apps.length)firebase.initializeApp(FIREBASE_CONFIG);}catch(e){console.error(e);}
+ form.addEventListener('submit',async e=>{e.preventDefault();msg('');const b=form.querySelector('button');b.disabled=true;
+  try{const auth=firebase.auth();await auth.setPersistence(firebase.auth.Auth.Persistence.SESSION);await auth.signInWithEmailAndPassword($('studentEmail').value.trim(),$('studentPassword').value);location.href='portal.html';}
+  catch(x){console.error(x);const c=x.code;msg((c==='auth/invalid-credential'||c==='auth/wrong-password'||c==='auth/user-not-found'||c==='auth/invalid-login-credentials')?'Incorrect email or password.':(c==='auth/too-many-requests'?'Too many attempts. Please wait and try again.':(x.message||'Sign-in failed.')));b.disabled=false;}});
+}else{form.addEventListener('submit',e=>{e.preventDefault();msg('Sign-in is not available right now. Please try the free demo or contact your teacher.');});}
+/* ---------- Free demo: same hand-off the old login page used ---------- */
+$('demoLoginBtn').onclick=()=>{try{sessionStorage.setItem('rfPendingCode','123123');}catch(e){}location.href='portal.html';};
+})();
+</script>
+<script>
+/* =========================================
+   WEBSITE PROTECTION
+   Blocks common browser shortcuts/devtools
+   ========================================= */
+
+(function () {
+    "use strict";
+
+    // Disable right-click
+    document.addEventListener("contextmenu", function (e) {
+        e.preventDefault();
+        return false;
+    });
+
+    // Disable common keyboard shortcuts
+    document.addEventListener("keydown", function (e) {
+        const key = e.key.toLowerCase();
+
+        // F12
+        if (e.key === "F12") {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+        }
+
+        // Ctrl shortcuts
+        if (e.ctrlKey) {
+
+            // Ctrl + U = View Source
+            if (key === "u") {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+
+            // Ctrl + S = Save Page
+            if (key === "s") {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+
+            // Ctrl + P = Print
+            if (key === "p") {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+
+            // Ctrl + C = Copy
+            if (key === "c") {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+
+            // Ctrl + X = Cut
+            if (key === "x") {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+
+            // Ctrl + A = Select All
+            if (key === "a") {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+
+            // Ctrl + Shift + I = Developer Tools
+            if (e.shiftKey && key === "i") {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+
+            // Ctrl + Shift + J = Console
+            if (e.shiftKey && key === "j") {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+
+            // Ctrl + Shift + C = Inspect Element
+            if (e.shiftKey && key === "c") {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+        }
+
+        // F1 / F3 / F6 / F10 / F11
+        if (
+            e.key === "F1" ||
+            e.key === "F3" ||
+            e.key === "F6" ||
+            e.key === "F10" ||
+            e.key === "F11"
+        ) {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+        }
+
+        // Shift + F10 = Context Menu
+        if (e.shiftKey && e.key === "F10") {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+        }
+    }, true);
+
+    // Disable text selection
+    document.addEventListener("selectstart", function (e) {
+        e.preventDefault();
+        return false;
+    });
+
+    // Disable dragging images/elements
+    document.addEventListener("dragstart", function (e) {
+        e.preventDefault();
+        return false;
+    });
+
+    // Disable copy
+    document.addEventListener("copy", function (e) {
+        e.preventDefault();
+        return false;
+    });
+
+    // Disable cut
+    document.addEventListener("cut", function (e) {
+        e.preventDefault();
+        return false;
+    });
+
+    // Disable paste if desired
+    document.addEventListener("paste", function (e) {
+        // Comment this section out if users need to paste
+        e.preventDefault();
+        return false;
+    });
+
+})();
+</script></body></html>

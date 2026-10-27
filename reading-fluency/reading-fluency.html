@@ -1,0 +1,147 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Reading Fluency Workspace | MathCloud</title><meta name="description" content="Practise oral reading with passage highlighting, microphone-based speech recognition, and a reading coach."><link rel="icon" type="image/png" sizes="any" href="logo.png"><link rel="shortcut icon" href="favicon.ico"><link rel="apple-touch-icon" href="logo.png"><link rel="stylesheet" href="site.css"></head><body><header class="nav"><a class="brand" href="index.html"><span class="mc-logo" aria-hidden="true"><i></i><i></i><i></i><img src="logo.png" alt=""></span><span>MathCloud <small>READING FLUENCY</small></span></a><nav class="navlinks"><a href="index.html">Home</a><a href="results.html">Results guide</a><a href="login.html">Sign in</a></nav></header><main class="container form-shell"><section class="form-card"><span class="eyebrow">Reading fluency workspace</span><h1>Read aloud. Get feedback. Practise again.</h1><p>The reading workspace includes published passages, microphone-based speech recognition, word tracking, elapsed time, estimated words per minute, and an end-of-session report. The floating Coach Reed panel stays beside the workspace and uses the browser's speech voice with animated mouth movement.</p><div class="noticebox"><strong>Recognition note:</strong> speech recognition depends on the browser, internet connection, microphone, accent, and background noise. It cannot guarantee perfect pronunciation scoring. Use a current Chrome or Edge browser over HTTPS for the strongest supported experience.</div><div class="actions"><a class="btn primary" href="login.html">Enter with passcode →</a><a class="btn" href="portal.html">Open reading portal</a></div></section></main><footer class="footer"><span>© MathCloud Tutorial</span><a href="index.html">Home</a></footer><script>
+/* =========================================
+   WEBSITE PROTECTION
+   Blocks common browser shortcuts/devtools
+   ========================================= */
+
+(function () {
+    "use strict";
+
+    // Disable right-click
+    document.addEventListener("contextmenu", function (e) {
+        e.preventDefault();
+        return false;
+    });
+
+    // Disable common keyboard shortcuts
+    document.addEventListener("keydown", function (e) {
+        const key = e.key.toLowerCase();
+
+        // F12
+        if (e.key === "F12") {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+        }
+
+        // Ctrl shortcuts
+        if (e.ctrlKey) {
+
+            // Ctrl + U = View Source
+            if (key === "u") {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+
+            // Ctrl + S = Save Page
+            if (key === "s") {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+
+            // Ctrl + P = Print
+            if (key === "p") {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+
+            // Ctrl + C = Copy
+            if (key === "c") {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+
+            // Ctrl + X = Cut
+            if (key === "x") {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+
+            // Ctrl + A = Select All
+            if (key === "a") {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+
+            // Ctrl + Shift + I = Developer Tools
+            if (e.shiftKey && key === "i") {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+
+            // Ctrl + Shift + J = Console
+            if (e.shiftKey && key === "j") {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+
+            // Ctrl + Shift + C = Inspect Element
+            if (e.shiftKey && key === "c") {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+        }
+
+        // F1 / F3 / F6 / F10 / F11
+        if (
+            e.key === "F1" ||
+            e.key === "F3" ||
+            e.key === "F6" ||
+            e.key === "F10" ||
+            e.key === "F11"
+        ) {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+        }
+
+        // Shift + F10 = Context Menu
+        if (e.shiftKey && e.key === "F10") {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+        }
+    }, true);
+
+    // Disable text selection
+    document.addEventListener("selectstart", function (e) {
+        e.preventDefault();
+        return false;
+    });
+
+    // Disable dragging images/elements
+    document.addEventListener("dragstart", function (e) {
+        e.preventDefault();
+        return false;
+    });
+
+    // Disable copy
+    document.addEventListener("copy", function (e) {
+        e.preventDefault();
+        return false;
+    });
+
+    // Disable cut
+    document.addEventListener("cut", function (e) {
+        e.preventDefault();
+        return false;
+    });
+
+    // Disable paste if desired
+    document.addEventListener("paste", function (e) {
+        // Comment this section out if users need to paste
+        e.preventDefault();
+        return false;
+    });
+
+})();
+</script></body></html>

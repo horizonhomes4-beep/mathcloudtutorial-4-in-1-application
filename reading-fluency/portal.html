@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Reading Fluency | MathCloud Tutorial</title>
+<meta name="description" content="MathCloud Reading Fluency student workspace: read passages aloud, get a clear fluency report and practise tricky words with Coach Reed.">
+<meta name="author" content="MathCloud Tutorial"><meta property="og:title" content="MathCloud Reading Fluency"><meta property="og:description" content="Practise reading aloud and review your progress with a guided reading coach."><meta property="og:image" content="logo.png">
+<meta name="robots" content="noindex,nofollow"><meta name="theme-color" content="#155eef">
+<link rel="icon" type="image/png" sizes="any" href="logo.png"><link rel="shortcut icon" href="favicon.ico"><link rel="apple-touch-icon" href="logo.png">
+<link rel="stylesheet" href="site.css"><link rel="stylesheet" href="render-fix.css"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet"><link rel="stylesheet" href="reading.css"><link rel="stylesheet" href="rf-pro.css"></head>
+<body class="mq">
+<header class="nav"><a class="brand" href="index.html"><span class="mc-logo" aria-hidden="true"><i></i><i></i><i></i><img src="logo.png" alt=""></span><span>MathCloud <small>READING FLUENCY</small></span></a><nav class="navlinks"><a href="results.html">Results guide</a><a href="subscribe.html">Subscription</a></nav></header>
+<main class="mq-wrap">
+
+<section id="loginView" class="mq-login">
+ <div class="mq-card mq-intro"><img src="mathcloud-human-guide.png" alt="Coach Reed"><div><span class="eyebrow">Meet your guide</span><h2>Hi, I’m Coach Reed 👋</h2>
+  <p>Welcome to MathCloud Reading Fluency. Choose a passage, press Start reading and read it aloud at your natural pace. I will follow every word you say, count your pace, and show you a clear report afterwards. Then we practise any tricky words together, one at a time. Not sure where to begin? Try the free demo.</p>
+  <ul class="mq-feat"><li>🎤 Read aloud with your voice</li><li>✨ Words light up as you read</li><li>📈 Pace and accuracy report</li><li>🔊 Practise tricky words</li></ul></div></div>
+ <div class="mq-card"><span class="eyebrow">Reading Fluency</span><h1 style="font-size:clamp(30px,5vw,40px);letter-spacing:-.04em;line-height:1.1;margin:10px 0">Read it. Hear it. Own it.</h1>
+  <p class="mq-muted">Sign in with the email and password given to you by your school. After you sign in you will be asked to turn on your microphone, once only.</p>
+  <form id="emailForm" class="mq-form" autocomplete="on"><div><label for="studentEmail">Student email</label><input id="studentEmail" type="email" required autocomplete="username" placeholder="name@example.com"></div><div><label for="studentPassword">Password</label><input id="studentPassword" type="password" required autocomplete="current-password" placeholder="Your password"></div><button class="btn primary" type="submit" style="width:100%">Sign in to reading</button><p id="emailLoginError" class="mq-msg" role="alert"></p></form>
+  <div class="mq-or">or</div>
+  <div class="noticebox"><strong>Free demo</strong><br>Enter your passcode, or use the demo passcode from your teacher. Demo progress is not saved.
+   <form id="passcodeForm" class="mq-form" style="margin-top:10px"><div><label for="passcode">Passcode</label><input id="passcode" autocomplete="one-time-code" placeholder="Enter your passcode" required maxlength="40"></div><button class="btn" type="submit">Open my dashboard →</button><p id="loginError" class="mq-msg" role="alert"></p></form>
+   <p><a href="subscribe.html">Subscription / access help</a></p></div></div>
+</section>
+
+<section id="dashboardView" class="hidden">
+ <div class="mq-head"><div><span class="eyebrow">Your reading space</span><h1>Hello, <span id="studentName">Reader</span></h1><p class="mq-muted">Every session is a chance to grow.</p></div><button id="logoutBtn" class="btn" type="button" style="padding:9px 16px">Sign out</button></div>
+ <div class="mq-metrics"><div class="mq-metric"><span>Sessions completed</span><strong id="sessionsCount">0</strong></div><div class="mq-metric"><span>Average WPM</span><strong id="avgWpm">—</strong></div><div class="mq-metric"><span>Average accuracy</span><strong id="avgAccuracy">—</strong></div><div class="mq-metric"><span>Average score</span><strong id="avgScore">—</strong></div></div>
+ <div class="mq-card" style="margin-bottom:18px"><div class="mq-card-head"><div><h2>Choose a passage</h2><p class="mq-muted">Pick up where you left off, then read it aloud.</p></div><span class="mq-chip" id="passageCount">Loading…</span></div>
+  <div id="passageGrid" class="passage-grid"><div class="panel loading">Loading your passages…</div></div></div>
+ <div class="mq-card"><h2>Recent sessions</h2><div id="historyList" class="mq-list"><p class="mq-muted">Your completed sessions will appear here.</p></div></div>
+</section>
+
+<section id="readingView" class="hidden" aria-live="polite">
+ <div class="mq-top"><button id="backBtn" class="btn" type="button" style="padding:9px 16px">← Leave reading</button><div class="grow"><span class="eyebrow">Reading session</span><h2 id="readingTitle">Passage title</h2></div><span class="mq-chip" id="readingLevel">Level</span></div>
+ <div class="mq-bar read-progress"><i id="readProgress"></i></div>
+ <div class="mq-sheet"><div class="mq-count"><span>READ ALOUD</span><span id="targetWordCount">0 words</span></div>
+  <div id="passageText" class="passage-text"></div>
+  <div class="session-controls"><button id="listenBtn" class="btn" type="button">🎧 Listen first</button><button id="startBtn" class="btn primary" type="button">● Start reading</button><button id="finishBtn" class="btn danger" type="button" disabled>Finish session</button><button id="retryBtn" class="btn" type="button" disabled>Try again</button></div>
+  <p id="speechStatus" class="mq-muted status" aria-live="polite">When you are ready, press Start reading and read clearly at your natural pace.</p>
+  <div class="live-strip"><div><small>Elapsed</small><b id="elapsed">00:00</b></div><div><small>Words recognised</small><b id="heardCount">0</b></div><div><small>Live WPM</small><b id="liveWpm">0</b></div></div>
+  <div class="mq-rule mq-tips"><b>Microphone tips</b><ul><li>Use Chrome or Edge and allow microphone access.</li><li>Find a quiet spot and read at a natural, steady pace.</li><li>Keep going if you make a mistake. The report will show words to practise.</li></ul><span style="font-size:12px;color:#4a5f82">Speech recognition is an estimate, not a perfect measure of pronunciation.</span></div>
+ </div>
+ <div id="resultPanel" class="hidden"></div>
+</section>
+
+<section id="guide" class="mq-card" style="margin-top:18px"><div class="guide-head"><h2>How it works</h2><p class="mq-muted">Four steps from passcode to progress. Press the button and Coach Reed will read the guide to you.</p>
+ <div class="guide-tools"><label class="rate">Voice speed<select id="voiceRate"><option value="0.75">Slow</option><option value="0.9">Normal</option><option value="1.05">Fast</option></select></label><button id="hearGuide" class="btn primary" type="button">🎧 Listen to how it works</button></div></div>
+ <ol class="guide-steps"><li class="guide-step"><b>Sign in</b><span>Use the email and password from your school, or the free demo passcode.</span></li><li class="guide-step"><b>Pick a passage and listen first</b><span>Hear it read aloud while each word lights up.</span></li><li class="guide-step"><b>Start reading aloud</b><span>Allow the microphone and read at your natural pace, then finish.</span></li><li class="guide-step"><b>Review and practise</b><span>See your WPM and accuracy, then say each word to your coach until it is right.</span></li></ol>
+ <p class="guide-rule"><b>Good to know:</b> the page stays fully active while the voice is reading. Press <b>Stop voice</b> or tap any button whenever you like.</p></section>
+</main>
+
+<aside class="mq-dock" id="coachDock" aria-label="Reading coach"><div class="av" id="dockAvatar"><img src="mathcloud-human-guide.png" alt="Coach Reed"></div><div><strong>Coach Reed</strong><p id="dockCoachSays">I’m here beside your reading. Press the button when you need help.</p><div class="dk-act"><button id="dockCoachTalk" type="button">🔊 Talk to me</button></div></div></aside>
+<footer class="footer"><span>© MathCloud Tutorial</span><a href="subscribe.html">Subscription</a></footer>
+
+<div id="micGate" class="mic-gate hidden" role="dialog" aria-modal="true" aria-labelledby="micTitle"><div class="mic-card"><div class="mic-orb" aria-hidden="true">🎤</div><span class="eyebrow">One quick step</span><h2 id="micTitle">Turn on your microphone</h2><p class="mq-muted">Your reading coach needs to hear you. Turn it on once and it will stay ready for every passage and every word.</p><button class="btn primary full" id="micEnable" type="button">🎤 Turn on microphone</button><p id="micMsg" class="mic-msg" role="status" aria-live="polite"></p><ol id="micHelp" class="mic-help hidden"><li>Click the lock or settings icon next to the web address.</li><li>Set <b>Microphone</b> to <b>Allow</b>.</li><li>Come back here and press <b>Try again</b>.</li></ol><button class="linklike" id="micSignOut" type="button">Not you? Sign out</button></div></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script><script src="firebase-config.js"></script><script src="history.js"></script><script src="rf-access.js"></script><script src="app.js"></script>
+<script>
+(function(){const code=sessionStorage.getItem('rfPendingCode');if(code){sessionStorage.removeItem('rfPendingCode');const input=document.getElementById('passcode');if(input){input.value=code;document.getElementById('passcodeForm').requestSubmit();}}
+})();
+</script>
+<script>
+/* =========================================
+   WEBSITE PROTECTION
+   Blocks common browser shortcuts/devtools
+   ========================================= */
+
+(function () {
+    "use strict";
+
+    // Disable right-click
+    document.addEventListener("contextmenu", function (e) {
+        e.preventDefault();
+        return false;
+    });
+
+    // Disable common keyboard shortcuts
+    document.addEventListener("keydown", function (e) {
+        const key = e.key.toLowerCase();
+
+        // F12
+        if (e.key === "F12") {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+        }
+
+        // Ctrl shortcuts
+        if (e.ctrlKey) {
+
+            // Ctrl + U = View Source
+            if (key === "u") {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+
+            // Ctrl + S = Save Page
+            if (key === "s") {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+
+            // Ctrl + P = Print
+            if (key === "p") {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+
+            // Ctrl + C = Copy
+            if (key === "c") {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+
+            // Ctrl + X = Cut
+            if (key === "x") {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+
+            // Ctrl + A = Select All
+            if (key === "a") {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+
+            // Ctrl + Shift + I = Developer Tools
+            if (e.shiftKey && key === "i") {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+
+            // Ctrl + Shift + J = Console
+            if (e.shiftKey && key === "j") {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+
+            // Ctrl + Shift + C = Inspect Element
+            if (e.shiftKey && key === "c") {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+        }
+
+        // F1 / F3 / F6 / F10 / F11
+        if (
+            e.key === "F1" ||
+            e.key === "F3" ||
+            e.key === "F6" ||
+            e.key === "F10" ||
+            e.key === "F11"
+        ) {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+        }
+
+        // Shift + F10 = Context Menu
+        if (e.shiftKey && e.key === "F10") {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+        }
+    }, true);
+
+    // Disable text selection
+    document.addEventListener("selectstart", function (e) {if(e.target&&/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName))return;
+        e.preventDefault();
+        return false;
+    });
+
+    // Disable dragging images/elements
+    document.addEventListener("dragstart", function (e) {
+        e.preventDefault();
+        return false;
+    });
+
+    // Disable copy
+    document.addEventListener("copy", function (e) {
+        e.preventDefault();
+        return false;
+    });
+
+    // Disable cut
+    document.addEventListener("cut", function (e) {
+        e.preventDefault();
+        return false;
+    });
+
+    // Disable paste if desired
+    document.addEventListener("paste", function (e) {if(e.target&&/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName))return;
+        // Comment this section out if users need to paste
+        e.preventDefault();
+        return false;
+    });
+
+})();
+</script></body></html>

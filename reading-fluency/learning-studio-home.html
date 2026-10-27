@@ -1,0 +1,439 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>MathCloud Learning Studio | Reading, Spelling & Maths Practice</title>
+<meta name="description" content="MathCloud Learning Studio helps students build reading fluency, spelling and vocabulary, reading comprehension and maths skills, with a talking learning guide and clear progress reports.">
+<meta name="keywords" content="MathCloud Tutorial, reading fluency, spelling and vocabulary, reading comprehension, maths quiz, online learning Nigeria, school literacy programme">
+<meta name="author" content="MathCloud Tutorial">
+<meta name="application-name" content="MathCloud Learning Studio">
+<meta name="robots" content="index,follow,max-image-preview:large">
+<meta name="theme-color" content="#155eef">
+<meta name="format-detection" content="telephone=no">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="MathCloud Tutorial">
+<meta property="og:locale" content="en_NG">
+<meta property="og:title" content="MathCloud Learning Studio | Reading, Spelling & Maths Practice">
+<meta property="og:description" content="Four focused learning programmes, a friendly voice guide, and clear progress reports for students, parents and schools.">
+<meta property="og:image" content="logo.png">
+<meta property="og:image:alt" content="MathCloud Educational logo">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="MathCloud Learning Studio">
+<meta name="twitter:description" content="Guided reading fluency, spelling, comprehension and maths practice for learners.">
+<meta name="twitter:image" content="logo.png">
+<link rel="icon" type="image/png" sizes="any" href="logo.png">
+<link rel="shortcut icon" href="favicon.ico">
+<link rel="apple-touch-icon" href="logo.png">
+<link rel="stylesheet" href="site.css">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@graph":[
+{"@type":"EducationalOrganization","name":"MathCloud Tutorial","alternateName":"MathCloud Learning Studio","logo":"logo.png","image":"logo.png","description":"Online learning programmes in reading fluency, spelling and vocabulary, reading comprehension and mathematics.","areaServed":"NG","knowsAbout":["Reading fluency","Spelling and vocabulary","Reading comprehension","Mathematics"],"makesOffer":[
+{"@type":"Offer","name":"Reading Fluency","price":"10000","priceCurrency":"NGN"},
+{"@type":"Offer","name":"Spelling and Vocabulary Enhancer","price":"10000","priceCurrency":"NGN"},
+{"@type":"Offer","name":"Reading Comprehension","price":"10000","priceCurrency":"NGN"},
+{"@type":"Offer","name":"Math Quiz","price":"10000","priceCurrency":"NGN"}]},
+{"@type":"WebSite","name":"MathCloud Learning Studio","inLanguage":"en"},
+{"@type":"FAQPage","mainEntity":[
+{"@type":"Question","name":"How much does a MathCloud programme cost?","acceptedAnswer":{"@type":"Answer","text":"Each programme costs 10,000 naira per student per year. Choose one programme or all four."}},
+{"@type":"Question","name":"How does Reading Fluency work?","acceptedAnswer":{"@type":"Answer","text":"Students listen to a passage, read it aloud, and receive an estimate of reading pace and word-match accuracy, then practise the words they missed."}},
+{"@type":"Question","name":"Can I try MathCloud for free?","acceptedAnswer":{"@type":"Answer","text":"Yes. Open Student login and use the guest demo passcode 123123 to explore Reading Fluency."}}]}]}
+</script>
+<style>
+:root{--rail:330px;--navh:78px;--dock:clamp(236px,37dvh,300px)}
+/* Shared logo: two continuously rotating rings */
+.nav{height:var(--navh)}
+.stage{display:grid;grid-template-columns:var(--rail) minmax(0,1fr);align-items:start}
+/* The guide column is its own grid cell: the page content can never sit underneath the avatar. */
+.guide-rail{position:sticky;top:var(--navh);height:calc(100vh - var(--navh));height:calc(100dvh - var(--navh));display:flex;flex-direction:column;gap:12px;padding:14px;background:linear-gradient(180deg,#eef4ff,#f8fbff);border-right:1px solid var(--line);z-index:15;min-width:0}
+.guide-figure{position:relative;flex:1 1 auto;min-height:0;display:flex;justify-content:center;align-items:flex-end;border-radius:26px;overflow:hidden;background:linear-gradient(165deg,#dfeeff 0,#fff 55%,#d9f6fb);border:1px solid #dbe6f7;transition:box-shadow .3s}
+.guide-figure img{height:100%;width:100%;object-fit:contain;object-position:center bottom;display:block;transform-origin:50% 100%}
+.guide-badge{position:absolute;left:10px;top:10px;max-width:calc(100% - 20px);background:#fff;border:1px solid #dce7f8;border-radius:99px;padding:6px 12px;color:var(--blue);font-size:12px;font-weight:800;box-shadow:0 8px 20px #17376b16}
+.voice-bars{position:absolute;right:10px;bottom:10px;display:flex;gap:3px;align-items:flex-end;height:22px;opacity:0;transition:opacity .2s}
+.voice-bars i{width:4px;height:6px;border-radius:3px;background:var(--blue)}
+.guide-rail.speaking .guide-figure{box-shadow:0 0 0 3px #45d6e888}
+.guide-rail.speaking .guide-figure img{animation:talk .9s ease-in-out infinite alternate}
+.guide-rail.speaking .voice-bars{opacity:1}
+.guide-rail.speaking .voice-bars i{animation:bar .5s ease-in-out infinite alternate}
+.voice-bars i:nth-child(2){animation-delay:.1s!important}.voice-bars i:nth-child(3){animation-delay:.2s!important}.voice-bars i:nth-child(4){animation-delay:.3s!important}
+@keyframes talk{to{transform:scale(1.012) translateY(-2px)}}@keyframes bar{to{height:22px}}
+.guide-panel{flex:0 0 auto;max-height:48%;overflow:auto;background:#fff;border:1px solid var(--line);border-radius:20px;padding:14px;box-shadow:0 14px 36px #17376b14}
+.guide-panel .eyebrow{font-size:11px}
+#guideSpeech{margin:4px 0 8px;font-size:14px;line-height:1.5;color:#33435d;max-height:7.5em;overflow:auto}
+.heard{font-size:12px;color:var(--muted);min-height:1.3em;font-style:italic}
+.home-mic-status{font-size:12px;color:var(--muted);margin:4px 0 8px}.home-mic-status.good{color:#07845e;font-weight:700}.home-mic-status.bad{color:#b42335}
+.guide-actions{display:flex;gap:7px;flex-wrap:wrap}
+.guide-actions .btn{font-size:12px;padding:9px 12px;border-radius:12px;box-shadow:0 3px 0 #dce5f4}
+.guide-actions .btn.primary{box-shadow:0 3px 0 #0a359d}
+#enableHomeMic .dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#aab6c9}
+.guide-rail.listening #enableHomeMic .dot{background:#13b981;animation:pulse 1.2s infinite}
+@keyframes pulse{50%{box-shadow:0 0 0 6px #13b98133}}
+.ask-guide-form{display:flex;gap:7px;margin-top:10px}
+.ask-guide-form input{min-width:0;flex:1;padding:9px 11px;border:1px solid #d7e1f0;border-radius:11px;font-size:13px;background:#fbfdff}
+.ask-guide-form .btn{padding:9px 14px;font-size:12px}
+.page{min-width:0}
+.page .container{width:auto;margin-inline:clamp(16px,3.2vw,48px)}
+.page .hero{padding:clamp(36px,6vw,72px) 0}
+.page .hero-grid{display:block}
+.page .hero h1{font-size:clamp(38px,4.6vw,64px)}
+.page .program-grid{grid-template-columns:repeat(auto-fit,minmax(215px,1fr))}
+.page .steps{grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}
+.page .cta{flex-wrap:wrap}
+.page .footer{padding-inline:clamp(16px,3.2vw,48px)}
+.programme-points{margin:0;padding:0;list-style:none}
+:focus-visible{outline:3px solid #45d6e8;outline-offset:2px}
+html{scroll-padding-top:calc(var(--navh) + 12px)}
+@media(max-width:1100px){:root{--rail:290px}}
+/* Phones and tablets: the guide becomes a fixed bottom dock with its own space; content is padded so nothing hides behind it. */
+@media(max-width:899px){
+ .stage{display:block}
+ .guide-rail{position:fixed;left:0;right:0;bottom:0;top:auto;height:var(--dock);flex-direction:row;gap:8px;padding:8px 8px calc(8px + env(safe-area-inset-bottom));border-right:0;border-top:1px solid var(--line);box-shadow:0 -12px 34px #17376b22}
+ .guide-figure{flex:0 0 33%;border-radius:18px}
+ .guide-panel{flex:1 1 auto;max-height:none;min-width:0;padding:10px;border-radius:16px}
+ #guideSpeech{font-size:12.5px;max-height:5.6em;margin-bottom:5px}
+ .guide-badge{font-size:10px;padding:4px 8px}
+ .page{padding-bottom:calc(var(--dock) + 14px)}
+ .page .container{margin-inline:16px}
+ .guide-actions .btn{padding:7px 9px;font-size:11px}
+ .home-mic-status{font-size:11px;margin:2px 0 6px}
+ .ask-guide-form{margin-top:7px}
+}
+@media(max-width:600px){.nav{height:auto;min-height:70px}.guide-figure{flex-basis:36%}}
+@media(max-height:560px) and (min-width:900px){.guide-panel{max-height:60%}}
+@media(prefers-reduced-motion:reduce){.guide-rail.speaking .guide-figure img,.voice-bars i{animation:none!important}}
+</style>
+</head>
+<body>
+<header class="nav">
+ <a class="brand" href="index.html" aria-label="MathCloud Learning Studio home"><span class="mc-logo" aria-hidden="true"><i></i><i></i><i></i><img src="logo.png" alt=""></span><span>MathCloud <small>LEARNING STUDIO</small></span></a>
+ <nav class="navlinks" aria-label="Main navigation"><a href="#programmes">Programmes</a><a href="#how">How it works</a><a href="subscribe.html">For schools &amp; families</a><a href="login.html">Student login</a><a class="btn primary" href="subscribe.html">Get started ↗</a></nav>
+</header>
+
+<div class="stage">
+ <aside class="guide-rail" id="guideRail" aria-label="MathCloud learning guide" role="complementary">
+  <div class="guide-figure">
+   <img src="mathcloud-human-guide.png" alt="MathCloud learning guide, a professional woman in a navy suit welcoming you" fetchpriority="high" width="1024" height="1536">
+
+   <span class="voice-bars" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+  </div>
+  <div class="guide-panel">
+   <p id="guideSpeech" aria-live="polite">Hello! I’m your learning guide. Allow the microphone and just ask me a question out loud.</p>
+   <div class="heard" id="heard" aria-live="polite"></div>
+   <div class="home-mic-status" id="homeMicStatus" role="status">Asking for microphone permission…</div>
+   <div class="guide-actions">
+    <button class="btn primary" id="enableHomeMic" type="button"><span class="dot"></span> <span id="micLabel">Enable microphone</span></button>
+    <button class="btn" id="startTour" type="button">Take a tour</button>
+    <button class="btn" id="guideSpeak" type="button" aria-label="Hear welcome again">🔊</button>
+   </div>
+   <form class="ask-guide-form" id="askGuideForm"><input id="guideQuestion" placeholder="Or type a question" autocomplete="off" aria-label="Ask your learning guide"><button class="btn primary" type="submit">Ask</button></form>
+  </div>
+ </aside>
+
+ <div class="page">
+  <main id="top">
+   <section class="hero" aria-labelledby="h1"><div class="container hero-grid"><div>
+    <span class="eyebrow">A smarter daily learning routine</span>
+    <h1 id="h1">Small steps.<br><em>Stronger skills.</em></h1>
+    <p class="lead">A focused learning space from MathCloud Tutorial where children practise reading aloud, grow vocabulary, understand what they read, and build confidence in mathematics, with clear feedback for learners, parents and schools.</p>
+    <div class="actions"><a class="btn primary" href="login.html">Try the free demo <span>→</span></a><a class="btn" href="#programmes">Explore programmes</a></div>
+    <div class="trust"><span>Four focused programmes</span><span>Student-friendly feedback</span><span>Parent and school enrolment</span></div>
+   </div></div></section>
+
+   <section class="section" id="programmes" aria-labelledby="h-prog"><div class="container"><div class="section-head"><span class="eyebrow">Four programmes, one learning space</span><h2 id="h-prog">Choose the skills your learner needs</h2><p>Subscribe to one programme or select all four. Each programme costs ₦10,000 per student for one year. Select programmes on the subscription page to see your total.</p></div>
+    <div class="program-grid">
+     <article class="program-card"><div class="program-icon">🎙️</div><h3>Reading Fluency</h3><p>Read passages aloud, follow guided practice, and review pace, word matching and session feedback.</p><span class="price">₦10,000 / year</span></article>
+     <article class="program-card"><div class="program-icon">🔤</div><h3>Spelling &amp; Vocabulary Enhancer</h3><p>Build spelling confidence, practise new words, and strengthen vocabulary through focused activities.</p><span class="price">₦10,000 / year</span></article>
+     <article class="program-card"><div class="program-icon">📚</div><h3>Reading Comprehension</h3><p>Develop understanding, identify key ideas, and practise answering questions about a text.</p><span class="price">₦10,000 / year</span></article>
+     <article class="program-card"><div class="program-icon">➗</div><h3>Math Quiz</h3><p>Practise mathematical concepts with quizzes that help learners see where to improve.</p><span class="price">₦10,000 / year</span></article>
+    </div></div></section>
+
+   <section class="section" id="how" style="background:#edf3ff" aria-labelledby="h-how"><div class="container"><div class="section-head"><span class="eyebrow">Simple to get started</span><h2 id="h-how">A clear journey from enrolment to progress</h2><p>Each task has its own place, so learners are never overwhelmed.</p></div>
+    <div class="steps">
+     <article class="step"><b>01</b><h3>Choose programmes</h3><p>Parents or schools enter learner details and tick one or more programmes. The page calculates the annual total.</p></article>
+     <article class="step"><b>02</b><h3>Access the learning area</h3><p>Students use their issued passcode. Guests can explore the reading-fluency demo with passcode <strong>123123</strong>.</p></article>
+     <article class="step"><b>03</b><h3>Practise and review</h3><p>Complete activities, review feedback, and use the reports to guide the next learning step.</p></article>
+    </div></div></section>
+
+   <section class="section" aria-labelledby="h-cta"><div class="container"><div class="cta"><div><span class="eyebrow" style="color:#b9f8ff">For parents, students &amp; schools</span><h2 id="h-cta" style="font-size:clamp(28px,4vw,42px);line-height:1.1;margin:12px 0">Build a learning plan that fits your student.</h2><p>Choose one or all four programmes and send a structured enrolment request to MathCloud Tutorial on WhatsApp, with student and school details and the calculated yearly fee.</p></div><a class="btn" href="subscribe.html">Start enrolment →</a></div></div></section>
+  </main>
+  <footer class="footer"><span>© <span id="year"></span> MathCloud Tutorial · Learning Studio</span><span>Learning support for students, families and schools</span><span><a href="login.html">Student login</a> · <a href="admin.html">Admin</a></span></footer>
+ </div>
+</div>
+
+<script>
+document.getElementById('year').textContent=new Date().getFullYear();
+(()=>{
+const $=id=>document.getElementById(id),rail=$('guideRail');
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+const TTS='speechSynthesis'in window;
+let rec=null,wantListen=false,micReady=false,speaking=false,speakId=0,lang='en-NG',fails=0,pendingSpeech=null,tourTimer=null,voice=null;
+
+const setStatus=(t,c='')=>{const e=$('homeMicStatus');e.textContent=t;e.className='home-mic-status '+c;};
+const show=t=>{$('guideSpeech').textContent=t;};
+const setMicLabel=()=>{$('micLabel').textContent=!micReady?'Enable microphone':wantListen?'Listening · tap to mute':'Muted · tap to listen';};
+
+/* ---------- Voice: pick the most natural English female voice available, never go silent ---------- */
+function pickVoice(){
+ const vs=speechSynthesis.getVoices().filter(v=>/^en/i.test(v.lang));if(!vs.length)return null;
+ const sc=v=>{const n=v.name;let s=0;
+  if(/natural|neural|online/i.test(n))s+=100;
+  if(/aria|jenny|sonia|libby|ava|emma|michelle|samantha|karen|serena|moira|tessa|zira|hazel|susan|female/i.test(n))s+=60;
+  if(/google uk english female|google us english/i.test(n))s+=50;
+  if(/\b(male|david|mark|guy|ryan|daniel|george|alex|fred|james)\b/i.test(n)&&!/female/i.test(n))s-=200;
+  if(/en-NG/i.test(v.lang))s+=20;else if(/en-GB/i.test(v.lang))s+=15;else if(/en-US/i.test(v.lang))s+=10;
+  if(v.localService===false)s+=5;return s;};
+ return vs.map(v=>[v,sc(v)]).sort((a,b)=>b[1]-a[1])[0][0];}
+if(TTS){speechSynthesis.onvoiceschanged=()=>{voice=pickVoice();};voice=pickVoice();}
+
+function say(text){
+ show(text);if(!TTS)return;
+ const id=++speakId;speechSynthesis.cancel();pauseListen();
+ const parts=(text.match(/[^.!?]+[.!?]*/g)||[text]).map(s=>s.trim()).filter(Boolean);let left=parts.length;
+ speaking=true;rail.classList.add('speaking');
+ const done=()=>{if(id!==speakId)return;if(--left<=0){speaking=false;rail.classList.remove('speaking');setTimeout(startRec,450);}};
+ voice=voice||pickVoice();
+ parts.forEach(p=>{const u=new SpeechSynthesisUtterance(p);if(voice){u.voice=voice;u.lang=voice.lang;}u.rate=.97;u.pitch=1;
+  u.onend=done;u.onerror=e=>{if(id===speakId&&e.error==='not-allowed')pendingSpeech=text;done();};speechSynthesis.speak(u);});
+}
+/* Browsers block speech until the visitor interacts once; the welcome plays on the first tap, key press or scroll. */
+['pointerdown','keydown','touchstart','wheel'].forEach(ev=>addEventListener(ev,()=>{if(pendingSpeech){const t=pendingSpeech;pendingSpeech=null;say(t);}},{passive:true}));
+
+/* ---------- Listening: continuous, auto-restarting, paused while the guide talks ---------- */
+function pauseListen(){if(rec){try{rec.abort();}catch(e){}}}
+function startRec(){
+ if(!SR||!wantListen||speaking||rec||document.hidden)return;
+ try{rec=new SR();rec.lang=lang;rec.continuous=true;rec.interimResults=true;rec.maxAlternatives=4;
+  rec.onstart=()=>{rail.classList.add('listening');fails=0;setStatus('Listening. Just ask your question.','good');};
+  rec.onresult=e=>{if(speaking)return;let interim='';
+   for(let i=e.resultIndex;i<e.results.length;i++){const r=e.results[i];
+    if(r.isFinal){const alts=[...r].map(a=>a.transcript.trim()).filter(Boolean);if(alts.length)heard(alts);}else interim+=r[0].transcript;}
+   if(interim)$('heard').textContent='Hearing: '+interim;};
+  rec.onerror=e=>{const er=e.error;
+   if(er==='language-not-supported'){lang='en-GB';}
+   else if(er==='not-allowed'||er==='service-not-allowed'){wantListen=false;setMicLabel();setStatus('Speech recognition is blocked. Allow the microphone in your browser’s site settings, then reload. You can still type below.','bad');}
+   else if(er==='network'){fails++;setStatus('Speech recognition needs an internet connection. Retrying…','bad');}
+   else if(er!=='no-speech'&&er!=='aborted'){fails++;}};
+  rec.onend=()=>{rec=null;rail.classList.remove('listening');if(wantListen&&!speaking)setTimeout(startRec,Math.min(250+fails*600,4000));};
+  rec.start();}catch(e){rec=null;}
+}
+document.addEventListener('visibilitychange',()=>{if(document.hidden)pauseListen();else startRec();});
+
+/* ---------- Microphone permission: asked automatically on every page load, one prompt ---------- */
+async function requestMic(){
+ if(!window.isSecureContext){setStatus('Microphone needs a secure (HTTPS) page. Open the site over HTTPS. You can still type.','bad');return false;}
+ if(!navigator.mediaDevices?.getUserMedia){setStatus('This browser cannot use the microphone. Use current Chrome or Edge. You can still type.','bad');return false;}
+ try{
+  setStatus('Please choose Allow when your browser asks to use the microphone.');
+  const s=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}});
+  try{const C=window.AudioContext||window.webkitAudioContext,ctx=new C(),src=ctx.createMediaStreamSource(s),an=ctx.createAnalyser(),buf=new Uint8Array(128);an.fftSize=256;src.connect(an);await new Promise(r=>setTimeout(r,350));an.getByteTimeDomainData(buf);
+   const rms=Math.sqrt(buf.reduce((a,v)=>a+(v-128)**2,0)/buf.length);if(rms<=1.2)setStatus('Microphone allowed, but the input level is low. Check your selected microphone.','bad');ctx.close();}catch(e){}
+  s.getTracks().forEach(t=>t.stop());micReady=true;wantListen=true;setMicLabel();
+  if(!SR){setStatus('Microphone allowed, but this browser has no speech recognition. Use Chrome or Edge, or type below.','bad');wantListen=false;setMicLabel();return true;}
+  startRec();return true;
+ }catch(e){setStatus(e.name==='NotAllowedError'?'Microphone is blocked for this site. Click the lock icon beside the address, set Microphone to Allow, then reload.':'No microphone found. Check your device, or type your question.','bad');return false;}
+}
+$('enableHomeMic').addEventListener('click',async()=>{
+ if(!micReady){await requestMic();return;}
+ wantListen=!wantListen;setMicLabel();
+ if(wantListen)startRec();else{pauseListen();setStatus('Microphone muted. Tap again to listen.');}
+});
+
+/* ---------- Understanding questions: scored keyword intents with typo tolerance ---------- */
+const lev=(a,b)=>{const d=Array.from({length:a.length+1},(_,i)=>[i]);for(let j=1;j<=b.length;j++)d[0][j]=j;for(let i=1;i<=a.length;i++)for(let j=1;j<=b.length;j++)d[i][j]=Math.min(d[i-1][j]+1,d[i][j-1]+1,d[i-1][j-1]+(a[i-1]===b[j-1]?0:1));return d[a.length][b.length];};
+const near=(a,b)=>{if(a===b)return true;const m=Math.min(a.length,b.length);if(m<5)return false;return lev(a,b)<=1||a.slice(0,5)===b.slice(0,5);};
+const KB=[
+ {k:'hello hi hey greetings morning afternoon evening',a:'Hello! Lovely to meet you. Ask me about the programmes, prices, the free demo, or how reading fluency works.'},
+ {k:'thanks thank cheers appreciate',a:'You’re welcome! Ask me anything else whenever you like.'},
+ {k:'who you name guide teacher avatar real',a:'I’m the MathCloud learning guide. I can explain the programmes, prices, the free demo and how to get started.'},
+ {k:'reading fluency fluent aloud wpm pace speed passage read',a:'Reading Fluency lets a student listen to a passage, then read it aloud. The system compares what it hears with the passage and estimates reading pace and word matching, then helps the student practise any missed words. Use a quiet room and allow the microphone.',go:'#programmes'},
+ {k:'spelling spell vocabulary words word',a:'Spelling and Vocabulary Enhancer helps learners build word knowledge, practise new words, and spell with more confidence.',go:'#programmes'},
+ {k:'maths math mathematics quiz numbers arithmetic',a:'Math Quiz offers practice quizzes that help learners check their understanding and see where to improve.',go:'#programmes'},
+ {k:'comprehension understand questions meaning text',a:'Reading Comprehension helps learners find key ideas and answer questions about a text.',go:'#programmes'},
+ {k:'programmes programs courses offer subjects four available',a:'There are four programmes: Reading Fluency, Spelling and Vocabulary Enhancer, Reading Comprehension, and Math Quiz.',go:'#programmes'},
+ {k:'price cost fee fees pay payment much naira subscription subscribe',a:'Each programme costs ten thousand naira per student per year. You can choose one, or all four. The subscription page calculates your total.',go:'#programmes'},
+ {k:'enrol enroll register join sign school family parent parents start',a:'To enrol, open For schools and families, enter the student details, tick the programmes, and send the request to MathCloud on WhatsApp.',go:'#how'},
+ {k:'demo free trial guest passcode try',a:'You can try the free demo. Open Student login and enter the guest passcode one two three, one two three.',go:'#how'},
+ {k:'login log signin student passcode account',a:'Students open Student login and enter the passcode issued by their teacher or school.',go:'#how'},
+ {k:'microphone mic hear voice listening permission',a:'I use your microphone so you can ask me questions out loud. If it is blocked, click the lock icon beside the address, set Microphone to Allow, and reload the page.'},
+ {k:'tour show around walk explain website',fn:()=>tour()}
+];
+function match(text){const toks=text.toLowerCase().replace(/[^a-z0-9\s]/g,' ').split(/\s+/).filter(t=>t.length>2);let best=null,top=0;
+ KB.forEach(e=>{const ks=e.k.split(' ');let s=0;toks.forEach(t=>{if(ks.some(k=>near(t,k)))s++;});if(s>top){top=s;best=e;}});return{best,top};}
+function heard(alts){let pick=alts[0],bs=-1;alts.forEach(a=>{const m=match(a);if(m.top>bs){bs=m.top;pick=a;}});
+ $('heard').textContent='You said: “'+pick+'”';$('guideQuestion').value=pick;answer(pick);}
+function answer(q){const {best,top}=match(q);
+ if(!best||!top){say('I’m not sure I caught that. You can ask about the programmes, prices, the free demo, or how reading fluency works.');return;}
+ if(best.fn){best.fn();return;}
+ say(best.a);if(best.go){const t=document.querySelector(best.go);t&&t.scrollIntoView({behavior:'smooth',block:'start'});}}
+$('askGuideForm').addEventListener('submit',e=>{e.preventDefault();const q=$('guideQuestion').value.trim();if(q)answer(q);});
+
+/* ---------- Welcome and tour ---------- */
+const WELCOME='Hello and welcome to MathCloud. I’m your learning guide. You can practise reading, spelling, comprehension and mathematics. I’m listening, so just ask me a question out loud.';
+$('guideSpeak').addEventListener('click',()=>say(WELCOME));
+function tour(){
+ const steps=[['Welcome to MathCloud. This is your home page.','Welcome','#top'],['Here are the four programmes: reading fluency, spelling and vocabulary, comprehension, and maths.','Programmes','#programmes'],['This shows how to get started, from enrolment to the student login.','How it works','#how'],['Use Student login to enter the learning area. When you read aloud, keep the microphone close and read at a natural pace.','Ready to learn','#how']];
+ let i=0;clearTimeout(tourTimer);
+ const next=()=>{if(i>=steps.length){$('guideBadge').textContent='Your learning guide';return;}const [t,b,sel]=steps[i];$('guideBadge').textContent=b;document.querySelector(sel)?.scrollIntoView({behavior:'smooth',block:'start'});say(t);i++;if(i<steps.length)tourTimer=setTimeout(next,Math.max(5200,t.length*72));};
+ next();}
+$('startTour').addEventListener('click',tour);
+
+/* ---------- Boot: welcome + mic permission on every load ---------- */
+(async()=>{
+ setMicLabel();
+ say(WELCOME);                       // plays now if allowed, otherwise on the first tap/scroll
+ let st='prompt';try{st=(await navigator.permissions.query({name:'microphone'})).state;}catch(e){}
+ if(st==='denied'){setStatus('Microphone is blocked for this site. Click the lock icon beside the address, set Microphone to Allow, then reload.','bad');return;}
+ requestMic();
+})();
+addEventListener('pagehide',()=>{pauseListen();if(TTS)speechSynthesis.cancel();});
+})();
+</script>
+<script>
+/* =========================================
+   WEBSITE PROTECTION
+   Blocks common browser shortcuts/devtools
+   ========================================= */
+
+(function () {
+    "use strict";
+
+    // Disable right-click
+    document.addEventListener("contextmenu", function (e) {
+        e.preventDefault();
+        return false;
+    });
+
+    // Disable common keyboard shortcuts
+    document.addEventListener("keydown", function (e) {
+        const key = e.key.toLowerCase();
+
+        // F12
+        if (e.key === "F12") {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+        }
+
+        // Ctrl shortcuts
+        if (e.ctrlKey) {
+
+            // Ctrl + U = View Source
+            if (key === "u") {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+
+            // Ctrl + S = Save Page
+            if (key === "s") {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+
+            // Ctrl + P = Print
+            if (key === "p") {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+
+            // Ctrl + C = Copy
+            if (key === "c") {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+
+            // Ctrl + X = Cut
+            if (key === "x") {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+
+            // Ctrl + A = Select All
+            if (key === "a") {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+
+            // Ctrl + Shift + I = Developer Tools
+            if (e.shiftKey && key === "i") {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+
+            // Ctrl + Shift + J = Console
+            if (e.shiftKey && key === "j") {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+
+            // Ctrl + Shift + C = Inspect Element
+            if (e.shiftKey && key === "c") {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+        }
+
+        // F1 / F3 / F6 / F10 / F11
+        if (
+            e.key === "F1" ||
+            e.key === "F3" ||
+            e.key === "F6" ||
+            e.key === "F10" ||
+            e.key === "F11"
+        ) {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+        }
+
+        // Shift + F10 = Context Menu
+        if (e.shiftKey && e.key === "F10") {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+        }
+    }, true);
+
+    // Disable text selection
+    document.addEventListener("selectstart", function (e) {
+        e.preventDefault();
+        return false;
+    });
+
+    // Disable dragging images/elements
+    document.addEventListener("dragstart", function (e) {
+        e.preventDefault();
+        return false;
+    });
+
+    // Disable copy
+    document.addEventListener("copy", function (e) {
+        e.preventDefault();
+        return false;
+    });
+
+    // Disable cut
+    document.addEventListener("cut", function (e) {
+        e.preventDefault();
+        return false;
+    });
+
+    // Disable paste if desired
+    document.addEventListener("paste", function (e) {
+        // Comment this section out if users need to paste
+        e.preventDefault();
+        return false;
+    });
+
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,147 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,follow"><meta name="theme-color" content="#155eef"><title>Student Login | MathCloud Learning Studio</title><meta name="description" content="Open your MathCloud learning area with your student passcode or try the free demo."><link rel="icon" type="image/png" sizes="any" href="logo.png"><link rel="shortcut icon" href="favicon.ico"><link rel="apple-touch-icon" href="logo.png"><link rel="stylesheet" href="site.css"></head><body><header class="nav"><a class="brand" href="index.html"><span class="mc-logo" aria-hidden="true"><i></i><i></i><i></i><img src="logo.png" alt=""></span><span>MathCloud <small>STUDENT ACCESS</small></span></a><nav class="navlinks"><a href="index.html">Home</a><a href="subscribe.html">Subscription</a><a href="admin.html">Admin</a></nav></header><main class="container form-shell"><section class="form-card"><span class="eyebrow">Welcome back</span><h1>Open your learning space</h1><p class="help">Sign in with the email and password created for you by your school. Guest visitors can use the demo passcode further down to explore Reading Fluency.</p><form id="emailLoginForm"><div class="field"><label for="loginEmail">Email</label><input id="loginEmail" type="email" autocomplete="username" required placeholder="name@example.com"></div><div class="field"><label for="loginPassword">Password</label><input id="loginPassword" type="password" autocomplete="current-password" required placeholder="Your password"></div><button class="btn primary" style="width:100%;margin-top:18px" type="submit">Sign in →</button><p id="emailLoginError" role="alert" style="color:#b42318"></p></form><hr style="margin:22px 0;border:0;border-top:1px solid #e2e9f4"><p class="help"><strong>Guest demo</strong> — enter the demo passcode below.</p><form id="loginForm"><div class="field"><label for="passcode">Demo passcode</label><input id="passcode" name="passcode" autocomplete="one-time-code" required maxlength="40" placeholder="Enter your passcode"></div><button class="btn primary" style="width:100%;margin-top:18px" type="submit">Continue to learning area →</button><p id="loginError" role="alert" style="color:#b42318"></p></form><div class="noticebox"><strong>Free guest demo</strong><br>Passcode: <strong>123123</strong><br>This demo uses sample reading content. Real student access uses the email and password created by the administrator.</div><p class="help" style="margin-top:18px">Need access? Ask your teacher or contact MathCloud Tutorial.</p><a class="btn" href="subscribe.html">Parent / school subscription</a></section></main><footer class="footer"><span>© MathCloud Tutorial</span><a href="index.html">Back to home</a></footer><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script><script src="firebase-config.js"></script><script>(function(){const f=document.getElementById('emailLoginForm'),er=document.getElementById('emailLoginError');if(!f||!window.firebase||!window.FIREBASE_CONFIG)return;if(!firebase.apps.length)firebase.initializeApp(FIREBASE_CONFIG);const auth=firebase.auth();f.addEventListener('submit',async e=>{e.preventDefault();er.textContent='';const b=f.querySelector('button');b.disabled=true;try{await auth.setPersistence(firebase.auth.Auth.Persistence.SESSION);await auth.signInWithEmailAndPassword(document.getElementById('loginEmail').value.trim(),document.getElementById('loginPassword').value);location.href='portal.html';}catch(x){console.error(x);er.textContent=(x.code==='auth/invalid-credential'||x.code==='auth/wrong-password'||x.code==='auth/user-not-found'||x.code==='auth/invalid-login-credentials')?'Incorrect email or password.':(x.code==='auth/too-many-requests'?'Too many attempts. Please wait and try again.':(x.message||'Sign-in failed.'));b.disabled=false;}});})();</script><script>document.getElementById('loginForm').addEventListener('submit',e=>{e.preventDefault();const code=document.getElementById('passcode').value.trim();if(!code)return;sessionStorage.setItem('rfPendingCode',code);location.href='portal.html';});</script><script>
+/* =========================================
+   WEBSITE PROTECTION
+   Blocks common browser shortcuts/devtools
+   ========================================= */
+
+(function () {
+    "use strict";
+
+    // Disable right-click
+    document.addEventListener("contextmenu", function (e) {
+        e.preventDefault();
+        return false;
+    });
+
+    // Disable common keyboard shortcuts
+    document.addEventListener("keydown", function (e) {
+        const key = e.key.toLowerCase();
+
+        // F12
+        if (e.key === "F12") {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+        }
+
+        // Ctrl shortcuts
+        if (e.ctrlKey) {
+
+            // Ctrl + U = View Source
+            if (key === "u") {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+
+            // Ctrl + S = Save Page
+            if (key === "s") {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+
+            // Ctrl + P = Print
+            if (key === "p") {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+
+            // Ctrl + C = Copy
+            if (key === "c") {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+
+            // Ctrl + X = Cut
+            if (key === "x") {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+
+            // Ctrl + A = Select All
+            if (key === "a") {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+
+            // Ctrl + Shift + I = Developer Tools
+            if (e.shiftKey && key === "i") {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+
+            // Ctrl + Shift + J = Console
+            if (e.shiftKey && key === "j") {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+
+            // Ctrl + Shift + C = Inspect Element
+            if (e.shiftKey && key === "c") {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+        }
+
+        // F1 / F3 / F6 / F10 / F11
+        if (
+            e.key === "F1" ||
+            e.key === "F3" ||
+            e.key === "F6" ||
+            e.key === "F10" ||
+            e.key === "F11"
+        ) {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+        }
+
+        // Shift + F10 = Context Menu
+        if (e.shiftKey && e.key === "F10") {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+        }
+    }, true);
+
+    // Disable text selection
+    document.addEventListener("selectstart", function (e) {if(e.target&&/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName))return;
+        e.preventDefault();
+        return false;
+    });
+
+    // Disable dragging images/elements
+    document.addEventListener("dragstart", function (e) {
+        e.preventDefault();
+        return false;
+    });
+
+    // Disable copy
+    document.addEventListener("copy", function (e) {
+        e.preventDefault();
+        return false;
+    });
+
+    // Disable cut
+    document.addEventListener("cut", function (e) {
+        e.preventDefault();
+        return false;
+    });
+
+    // Disable paste if desired
+    document.addEventListener("paste", function (e) {if(e.target&&/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName))return;
+        // Comment this section out if users need to paste
+        e.preventDefault();
+        return false;
+    });
+
+})();
+</script></body></html>

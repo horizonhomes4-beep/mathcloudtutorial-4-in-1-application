@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Spelling Enhancer | MathCloud Tutorial</title>
+<meta name="description" content="Listen, think and type each word yourself with an on-screen keypad. Definitions, sentences and word origins from MathCloud Tutorial."><meta name="theme-color" content="#155eef"><meta name="robots" content="noindex,follow">
+<link rel="icon" type="image/png" sizes="any" href="logo.png"><link rel="shortcut icon" href="favicon.ico"><link rel="apple-touch-icon" href="logo.png">
+<link rel="stylesheet" href="site.css"><link rel="stylesheet" href="spelling.css"></head>
+<body class="mq">
+<header class="nav"><a class="brand" href="index.html"><span class="mc-logo" aria-hidden="true"><i></i><i></i><i></i><img src="logo.png" alt=""></span><span>MathCloud <small>SPELLING ENHANCER</small></span></a><nav class="navlinks"><a href="subscribe.html">Subscription</a><button id="logoutBtn" class="btn hidden" type="button" style="padding:9px 16px">Sign out</button></nav></header>
+<main class="mq-wrap">
+<section id="loginView" class="mq-login">
+ <div class="mq-card mq-intro"><img src="mathcloud-human-guide.png" alt="Coach Reed"><div><span class="eyebrow">Meet your guide</span><h2>Hi, I’m Coach Reed 👋</h2>
+  <p id="introText">Welcome to the MathCloud Spelling Enhancer. I am Coach Reed. I will say a word, and you type it on the on-screen keypad, so no spell checker can help you. You will never see the word while you work. If you need help, press Definition, Use in a sentence, or Origin, and I will read you the clue. Origin tells you which language the word comes from. Every test has 20 words: choose one register, mix all registers, or let me surprise you with a random one. I avoid repeating words you practised recently. Afterwards I will show you the correct spelling and walk you through every word you missed. No passcode yet? Try the free demo.</p>
+  <button id="introBtn" class="btn primary" type="button">🔊 Hear my introduction</button>
+  <ul class="mq-feat"><li>⌨️ Type on a safe keypad</li><li>💡 Definition, sentence, origin</li><li>🗂️ Word registers by topic</li><li>📈 Weak-register analysis</li></ul></div></div>
+ <div class="mq-card"><span class="eyebrow">Spelling Enhancer</span><h1 style="font-size:clamp(30px,5vw,40px);letter-spacing:-.04em;line-height:1.1;margin:10px 0">Hear it. Think it. Spell it.</h1>
+  <p class="mq-muted">Sign in with the email and password given to you by your teacher. One device is allowed at a time.</p>
+  <form id="loginForm" class="mq-form" autocomplete="on"><div><label for="studentEmail">Student email</label><input id="studentEmail" type="email" required autocomplete="username" placeholder="name@example.com"></div><div><label for="studentPassword">Password</label><input id="studentPassword" type="password" required autocomplete="current-password" placeholder="Your password"></div><button class="btn primary" type="submit" style="width:100%">Sign in to spelling</button><p id="loginError" class="mq-msg" role="alert"></p></form>
+  <div class="noticebox"><strong>Free demo</strong><br>Try the free demo without an account. Demo progress is not saved.<br><button id="demoLoginBtn" class="btn" type="button" style="margin-top:10px">Try free demo</button><p><a href="subscribe.html">Subscription / access help</a></p></div></div>
+</section>
+<section id="dashView" class="hidden">
+ <div class="mq-head"><div><span class="eyebrow">Your spelling space</span><h1>Hello, <span id="studentName">Learner</span></h1><p class="mq-muted" id="bankInfo">Loading words…</p><div id="diag" class="hidden"></div></div></div>
+ <div class="mq-metrics"><div class="mq-metric"><span>Tests taken</span><strong id="mTaken">0</strong></div><div class="mq-metric"><span>Average score</span><strong id="mAvg">—</strong></div><div class="mq-metric"><span>Best score</span><strong id="mBest">—</strong></div><div class="mq-metric"><span>Words attempted</span><strong id="mAnswered">0</strong></div></div>
+ <div class="mq-card" style="margin-bottom:18px"><h2>Choose a word register</h2><p class="mq-muted">Words are grouped by register. Pick one to start a 20-word test. You hear each word and type it yourself.</p>
+  <div id="regCards" class="sp-regs"></div><div id="rule" class="mq-rule"></div><p id="startMsg" class="mq-msg" role="alert"></p></div>
+ <div class="mq-card" style="margin-bottom:18px"><h2>How it works</h2><ol class="mq-ins" style="margin:8px 0 0"><li>Press 🔊 to hear the word again.</li><li>Press Definition, Sentence or Origin and Coach Reed reads you the clue. Nothing is shown on screen.</li><li>Type with the keypad, then press Check.</li><li>See the correct spelling and learn from it.</li></ol></div>
+ <div class="mq-card" style="margin-bottom:18px"><h2>Your performance</h2><p class="mq-muted" id="anaLead"></p><div id="anaWeak" class="hidden"></div><div id="anaReg" class="mq-topics" style="margin-top:12px"></div></div>
+ <div class="mq-card"><h2>Recent tests</h2><div id="history" class="mq-list"><p class="mq-muted">Finished tests appear here.</p></div></div>
+</section>
+<section id="testView" class="hidden" aria-live="polite">
+ <div class="mq-top"><button id="quitBtn" class="btn" type="button" style="padding:9px 16px">← Leave test</button><div class="grow"><h2 id="testTitle">Spelling test</h2></div><span class="mq-timer" id="timer">00:00</span></div>
+ <div class="mq-bar"><i id="bar"></i></div>
+ <div class="mq-sheet"><div class="mq-count"><span id="counter">Word 1</span><span id="regTag"></span></div>
+  <div class="sp-sub" style="margin:12px 0 0"><button id="hearBtn" class="btn primary" type="button">🔊 Hear the word</button></div>
+  <div class="sp-clues" style="margin-top:12px"><button id="defBtn" class="btn" type="button">📖 Definition</button><button id="senBtn" class="btn" type="button">💬 Use in a sentence</button><button id="oriBtn" class="btn" type="button">🌍 Origin</button></div>
+  <div id="clue" class="sp-clue hidden"></div>
+  <div id="typed" class="sp-box ph" aria-live="polite">Type the word you hear</div>
+  <div id="pad" class="sp-pad" role="group" aria-label="Letter keypad"></div>
+  <div class="sp-sub"><button id="checkBtn" class="btn primary" type="button">Check spelling</button></div>
+  <div id="fb" class="mq-fb hidden" role="status"></div>
+  <div class="sp-sub"><button id="nextBtn" class="btn primary hidden" type="button">Next word</button></div></div>
+</section>
+<section id="resultView" class="hidden"><div class="mq-card"><div class="mq-result"><div class="mq-ring" id="ring"><div id="ringTxt">0%</div></div>
+ <div><span class="eyebrow">Your results</span><h2 id="resTitle" style="font-size:28px;margin:6px 0">Well done!</h2><p id="resSub" class="mq-muted"></p>
+ <div class="actions" style="margin:16px 0 0"><button id="againBtn" class="btn primary" type="button">Try again</button><button id="homeBtn" class="btn" type="button">Back to dashboard</button><button id="sayBtn" class="btn" type="button">🔊 Explain my result</button></div><p id="saveMsg" class="mq-msg"></p></div></div>
+ <h3 style="margin:26px 0 10px">How you did by register</h3><div id="regRep" class="mq-topics"></div><div id="weakNote" class="hidden"></div>
+ <h3 style="margin:26px 0 0">Review every word</h3><p class="mq-muted">Missed words are open. Press Spell it and Coach Reed spells it out letter by letter.</p><div id="review" class="mq-review"></div></div></section>
+</main>
+<aside class="mq-dock" id="dock" aria-label="Spelling coach"><div class="av"><img src="mathcloud-human-guide.png" alt="Coach Reed"></div><div><strong>Coach Reed</strong><p id="dockSays">Choose a register when you are ready.</p><div class="dk-act"><button id="dockReplay" type="button">🔊 Replay</button></div></div></aside>
+<footer class="footer"><span>© MathCloud Tutorial</span><a href="subscribe.html">Subscription</a></footer>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="firebase-config.js"></script><script src="spelling-seed.js"></script><script src="spelling.js"></script>
+<script>
+/* =========================================
+   WEBSITE PROTECTION
+   Blocks common browser shortcuts/devtools
+   ========================================= */
+
+(function () {
+    "use strict";
+
+    // Disable right-click
+    document.addEventListener("contextmenu", function (e) {
+        e.preventDefault();
+        return false;
+    });
+
+    // Disable common keyboard shortcuts
+    document.addEventListener("keydown", function (e) {
+        const key = e.key.toLowerCase();
+
+        // F12
+        if (e.key === "F12") {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+        }
+
+        // Ctrl shortcuts
+        if (e.ctrlKey) {
+
+            // Ctrl + U = View Source
+            if (key === "u") {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+
+            // Ctrl + S = Save Page
+            if (key === "s") {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+
+            // Ctrl + P = Print
+            if (key === "p") {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+
+            // Ctrl + C = Copy
+            if (key === "c") {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+
+            // Ctrl + X = Cut
+            if (key === "x") {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+
+            // Ctrl + A = Select All
+            if (key === "a") {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+
+            // Ctrl + Shift + I = Developer Tools
+            if (e.shiftKey && key === "i") {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+
+            // Ctrl + Shift + J = Console
+            if (e.shiftKey && key === "j") {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+
+            // Ctrl + Shift + C = Inspect Element
+            if (e.shiftKey && key === "c") {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+        }
+
+        // F1 / F3 / F6 / F10 / F11
+        if (
+            e.key === "F1" ||
+            e.key === "F3" ||
+            e.key === "F6" ||
+            e.key === "F10" ||
+            e.key === "F11"
+        ) {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+        }
+
+        // Shift + F10 = Context Menu
+        if (e.shiftKey && e.key === "F10") {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+        }
+    }, true);
+
+    // Disable text selection
+    document.addEventListener("selectstart", function (e) {
+        e.preventDefault();
+        return false;
+    });
+
+    // Disable dragging images/elements
+    document.addEventListener("dragstart", function (e) {
+        e.preventDefault();
+        return false;
+    });
+
+    // Disable copy
+    document.addEventListener("copy", function (e) {
+        e.preventDefault();
+        return false;
+    });
+
+    // Disable cut
+    document.addEventListener("cut", function (e) {
+        e.preventDefault();
+        return false;
+    });
+
+    // Disable paste if desired
+    document.addEventListener("paste", function (e) {
+        // Comment this section out if users need to paste
+        e.preventDefault();
+        return false;
+    });
+
+})();
+</script></body></html>

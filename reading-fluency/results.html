@@ -1,0 +1,149 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Reading Results & Progress | MathCloud</title><meta name="description" content="Understand reading-session results including reading pace, recognised words, accuracy estimates, and word practice."><link rel="icon" type="image/png" sizes="any" href="logo.png"><link rel="shortcut icon" href="favicon.ico"><link rel="apple-touch-icon" href="logo.png"><link rel="stylesheet" href="site.css"></head><body><header class="nav"><a class="brand" href="index.html"><span class="mc-logo" aria-hidden="true"><i></i><i></i><i></i><img src="logo.png" alt=""></span><span>MathCloud <small>RESULTS & PROGRESS</small></span></a><nav class="navlinks"><a href="index.html">Home</a><a href="reading-fluency.html">Reading fluency</a><a href="login.html">Student login</a></nav></header><main class="container form-shell"><section class="form-card"><span class="eyebrow">Progress review</span><h1 id="resultHeading">Your reading report</h1><div id="latestReport" class="noticebox">Your latest report will appear here after you finish a reading session. If you just completed a passage, this page reads the report saved in this browser session.</div><p>Measures are estimates based on browser speech recognition. Results may be affected by the microphone, background noise, accent, and recognition support.</p><div class="steps"><article class="step"><b>01</b><h3>Review the measures</h3><p>Use WPM and word matching as helpful estimates, not as a standalone diagnosis or perfect pronunciation judgement.</p></article><article class="step"><b>02</b><h3>Practise corrections</h3><p>Coach Reed reads selected words aloud and guides the learner through another attempt.</p></article><article class="step"><b>03</b><h3>Keep a learning record</h3><p>Signed-in student sessions are saved to the configured Firebase Realtime Database. Demo results are sample-only and are not saved to the school database.</p></article></div><div class="actions"><a class="btn primary" href="login.html">Open my reading report →</a><a class="btn" href="reading-fluency.html">Reading workspace</a></div></section></main><footer class="footer"><span>© MathCloud Tutorial</span><a href="index.html">Home</a></footer><script>
+(function(){const box=document.getElementById('latestReport');try{const r=JSON.parse(sessionStorage.getItem('rfLastResult')||'null');if(!r)return;document.getElementById('resultHeading').textContent='Reading report: '+(r.passageTitle||'Completed passage');const fmt=n=>Number(n||0).toLocaleString();box.className='';box.style.cssText='display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:20px 0';const metrics=[['Overall score',fmt(r.overallScore)+'%'],['Reading pace',fmt(r.wpm)+' WPM'],['Word-match accuracy',fmt(r.accuracy)+'%'],['Time spent',Math.floor((r.durationSeconds||0)/60)+'m '+((r.durationSeconds||0)%60)+'s'],['Words matched',fmt(r.matched)+' / '+fmt(r.expectedCount)],['Words needing review',fmt((r.issues||[]).length)]];box.innerHTML=metrics.map(([a,b])=>'<div style="padding:17px;border:1px solid #e2e9f4;border-radius:15px;background:#f8faff"><div style="font-size:12px;color:#66748b">'+a+'</div><strong style="font-size:23px;color:#155eef">'+b+'</strong></div>').join('')+'<div style="grid-column:1/-1;padding:16px;border:1px solid #e2e9f4;border-radius:15px"><b>Word review</b><p style="color:#66748b;font-size:13px">Speech-recognition output can miss or mishear words. Use this list as a practice guide, not as a definitive pronunciation judgement.</p>'+(r.issues&&r.issues.length?'<ul>'+r.issues.slice(0,30).map(x=>'<li>Expected: <b>'+String(x.expected||'—').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))+'</b> · Heard: '+String(x.spoken||'not recognised').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))+'</li>').join('')+'</ul>':'<p>No words were flagged for review in this session.</p>')+'</div>'; }catch(e){console.error(e)}})();
+</script><script>
+/* =========================================
+   WEBSITE PROTECTION
+   Blocks common browser shortcuts/devtools
+   ========================================= */
+
+(function () {
+    "use strict";
+
+    // Disable right-click
+    document.addEventListener("contextmenu", function (e) {
+        e.preventDefault();
+        return false;
+    });
+
+    // Disable common keyboard shortcuts
+    document.addEventListener("keydown", function (e) {
+        const key = e.key.toLowerCase();
+
+        // F12
+        if (e.key === "F12") {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+        }
+
+        // Ctrl shortcuts
+        if (e.ctrlKey) {
+
+            // Ctrl + U = View Source
+            if (key === "u") {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+
+            // Ctrl + S = Save Page
+            if (key === "s") {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+
+            // Ctrl + P = Print
+            if (key === "p") {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+
+            // Ctrl + C = Copy
+            if (key === "c") {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+
+            // Ctrl + X = Cut
+            if (key === "x") {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+
+            // Ctrl + A = Select All
+            if (key === "a") {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+
+            // Ctrl + Shift + I = Developer Tools
+            if (e.shiftKey && key === "i") {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+
+            // Ctrl + Shift + J = Console
+            if (e.shiftKey && key === "j") {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+
+            // Ctrl + Shift + C = Inspect Element
+            if (e.shiftKey && key === "c") {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+        }
+
+        // F1 / F3 / F6 / F10 / F11
+        if (
+            e.key === "F1" ||
+            e.key === "F3" ||
+            e.key === "F6" ||
+            e.key === "F10" ||
+            e.key === "F11"
+        ) {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+        }
+
+        // Shift + F10 = Context Menu
+        if (e.shiftKey && e.key === "F10") {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+        }
+    }, true);
+
+    // Disable text selection
+    document.addEventListener("selectstart", function (e) {
+        e.preventDefault();
+        return false;
+    });
+
+    // Disable dragging images/elements
+    document.addEventListener("dragstart", function (e) {
+        e.preventDefault();
+        return false;
+    });
+
+    // Disable copy
+    document.addEventListener("copy", function (e) {
+        e.preventDefault();
+        return false;
+    });
+
+    // Disable cut
+    document.addEventListener("cut", function (e) {
+        e.preventDefault();
+        return false;
+    });
+
+    // Disable paste if desired
+    document.addEventListener("paste", function (e) {
+        // Comment this section out if users need to paste
+        e.preventDefault();
+        return false;
+    });
+
+})();
+</script></body></html>
