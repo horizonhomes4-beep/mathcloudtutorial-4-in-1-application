@@ -74,6 +74,32 @@ body{padding-bottom:265px}}
 @media(max-width:680px){.coach-launcher{right:10px;top:auto;bottom:18px;transform:none;width:66px;height:66px}.coach-launcher:hover{transform:scale(1.04)}.launcher-label{right:74px;font-size:.72rem;padding:7px 9px}.coach-say{right:10px!important;left:10px!important;top:auto!important;bottom:94px!important;transform:none!important;width:auto!important;max-height:58vh;border-radius:18px}.coach-say #coachText{max-height:100px}.chat{right:16px;bottom:96px;width:48px;height:48px}}
 @media(max-width:380px){.coach-launcher{width:60px;height:60px;right:8px;bottom:12px}.coach-say{bottom:82px!important}.launcher-label{right:68px}}
 
+/* AVATAR VISIBILITY FIX: nothing may sit on top of the avatar */
+/* Hero: avatar on top, info cards placed below it instead of overlapping it */
+.hero-art{display:flex;flex-wrap:wrap;justify-content:center;align-content:flex-start;gap:12px;min-height:0;position:relative}
+.hero-art .halo{position:absolute;top:0;left:50%;transform:translateX(-50%);z-index:0}
+.hero-art .guide{position:relative;z-index:3;flex:0 0 100%;width:100%;max-width:290px;margin:0 auto}
+.hero-art .float-card{position:relative;top:auto;left:auto;right:auto;bottom:auto;z-index:2;padding:10px 14px;font-size:.84rem}
+.hero-art .fc1,.hero-art .fc2,.hero-art .fc3{top:auto;left:auto;right:auto;bottom:auto}
+
+/* Floating coach avatar: always on top, with the label kept off the face */
+.coach-launcher{z-index:1002;overflow:visible}
+.coach-launcher img{position:relative;z-index:1;display:block}
+.launcher-mic{z-index:2}
+.launcher-label{z-index:0;pointer-events:none}
+.chat{z-index:14}
+.coach-say{z-index:1000}
+@media(max-width:680px){
+.hero-art{order:-1;gap:10px}
+.hero-art .guide{max-width:260px}
+.hero-art .float-card{font-size:.8rem;padding:8px 12px}
+.launcher-label{display:none}
+}
+@media(max-width:900px){.hero-art .fc3{display:block}}
+@media(max-width:680px){.hero-art .fc3{display:none}}
+/* Remove write-ups that overlap the avatars */
+.float-card,.hero-art .float-card,.launcher-label{display:none!important}
+.hero-art{min-height:0!important}
 </style></head>
 <body>
 <div class="topline"><div class="wrap"><span>✨ Learning Beyond Imagination</span><span>For learners · parents · teachers · schools</span></div></div>
