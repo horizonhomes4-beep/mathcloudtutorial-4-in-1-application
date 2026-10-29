@@ -156,10 +156,41 @@ document.querySelectorAll('#tabs button').forEach(b => b.onclick = () => {
 $('fDays').innerHTML = DAYS.map((d, i) => `<label><input type="checkbox" value="${i}"> ${d}</label>`).join('');
 db.ref('.info/connected').on('value', s => $('conDot').classList.toggle('on', !!s.val()));
 
+/* live helpers: fresh presence, chime, call tracking */
+let ac, lastCall = null;
+const chime = f => { try { ac = ac || new (window.AudioContext || window.webkitAudioContext)(); ac.resume(); const o = ac.createOscillator(), g = ac.createGain(); o.frequency.value = f; o.connect(g); g.connect(ac.destination); g.gain.setValueAtTime(.2, ac.currentTime); g.gain.exponentialRampToValueAtTime(.0001, ac.currentTime + .4); o.start(); o.stop(ac.currentTime + .45); } catch (e) {} };
+const fresh = s => !!s.online && serverNow() - (s.lastSeen || 0) < 75000;
+const ago = t => { if (!t) return '—'; const m = Math.floor((serverNow() - t) / 60000); return m < 1 ? 'just now' : m < 60 ? m + ' min ago' : m < 1440 ? Math.floor(m / 60) + ' h ago' : new Date(t).toLocaleDateString(); };
+const baseTitle = document.title;
+document.addEventListener('pointerdown', () => { if (window.Notification && Notification.permission === 'default') Notification.requestPermission(); }, { once: true });
+function renderCalls() {
+  const el = $('callStat'); if (!el) return;
+  const c = (status._calls || {})[lastCall] || {};
+  el.innerHTML = lastCall ? '<b>Last call:</b> ' + (Object.values(c).map(x => `<span class="chip ${x.state === 'joined' ? 'done' : x.state === 'ringing' ? 'ready' : 'alerted'}">${esc(x.name)}: ${x.state}</span>`).join(' ') || '<span class="muted">ringing… students get it the moment their laptop is on</span>') : '';
+}
+{ const cs = document.createElement('div'); cs.id = 'callStat'; cs.style.margin = '8px 0'; $('callOne').parentNode.after(cs); }
+
 /* data */
 db.ref('dirActivities').on('value', s => { acts = s.val() || {}; renderActs(); fillSelects(); });
-db.ref('dirStudents').on('value', s => { students = s.val() || {}; renderRoster(); fillSelects(); });
-db.ref('dirStatus').on('value', s => { status = s.val() || {}; renderActs(); });
+let first = true, prevOn = {}, prevMsg = {};
+db.ref('dirStudents').on('value', s => {
+  students = s.val() || {};
+  Object.entries(students).forEach(([id, st]) => {
+    const on = fresh(st), mt = st.lastMsg ? st.lastMsg.ts : 0;
+    if (!first) {
+      if (on && !prevOn[id]) { chime(660); toast('🟢 ' + st.name + ' is online'); }
+      if (mt && mt > (prevMsg[id] || 0)) {
+        chime(990);
+        if (sel === id) localStorage.setItem('seen_' + id, Date.now()); else toast('💬 ' + st.name + ': ' + st.lastMsg.text);
+        if (document.hidden && window.Notification && Notification.permission === 'granted') new Notification(st.name, { body: st.lastMsg.text });
+      }
+    }
+    prevOn[id] = on; prevMsg[id] = mt;
+  });
+  first = false; renderRoster(); fillSelects();
+});
+setInterval(() => renderRoster(), 15000);
+db.ref('dirStatus').on('value', s => { status = s.val() || {}; renderActs(); renderCalls(); });
 db.ref('dirConfig').on('value', s => { cfg = { ...DEFAULTS, ...(s.val() || {}) }; $('cRate').value = cfg.voiceRate; $('cEnc').value = cfg.encourageMins; $('cRoom').value = cfg.classRoom; $('cBase').value = cfg.videoBase; $('cLock').checked = cfg.lockUntilReady !== false; });
 
 /* activities */
@@ -193,9 +224,11 @@ function renderActs() {
 
 /* students & selects */
 function renderRoster() {
-  const l = Object.entries(students).sort((a, b) => (b[1].online ? 1 : 0) - (a[1].online ? 1 : 0) || a[1].name.localeCompare(b[1].name));
-  $('onlineCount').textContent = l.filter(x => x[1].online).length + ' online';
-  $('roster').innerHTML = l.length ? l.map(([id, s]) => `<div class="act"><span class="dot ${s.online ? 'on' : ''}"></span><div style="flex:1"><b>${esc(s.name)}</b>${s.lastMsg && s.lastMsg.ts > (+localStorage.getItem('seen_' + id) || 0) ? ' <span class="chip ready">new message</span>' : ''}<br><span class="muted">${s.online ? 'Online now' : 'Last seen ' + (s.lastSeen ? new Date(s.lastSeen).toLocaleString() : '—')}</span></div><button class="small sky" onclick="pick('${id}')">Select</button></div>`).join('') : '<p class="muted">No student has opened the student page yet.</p>';
+  const l = Object.entries(students).sort((x, y) => (fresh(y[1]) ? 1 : 0) - (fresh(x[1]) ? 1 : 0) || x[1].name.localeCompare(y[1].name));
+  const on = l.filter(x => fresh(x[1])).length, nu = l.filter(([id, s]) => s.lastMsg && s.lastMsg.ts > (+localStorage.getItem('seen_' + id) || 0)).length;
+  $('onlineCount').textContent = on + ' / ' + l.length + ' online';
+  document.title = (nu ? '(' + nu + ') ' : '') + baseTitle + ' · ' + on + ' online';
+  $('roster').innerHTML = l.length ? l.map(([id, s]) => `<div class="act" style="${fresh(s) ? 'border-color:var(--grass)' : 'opacity:.75'}"><span class="dot ${fresh(s) ? 'on' : ''}"></span><div style="flex:1"><b>${esc(s.name)}</b>${s.lastMsg && s.lastMsg.ts > (+localStorage.getItem('seen_' + id) || 0) ? ' <span class="chip alerted">💬 new message</span>' : ''}<br><span class="muted">${fresh(s) ? '🟢 Online now' : '⚫ Offline · last seen ' + ago(s.lastSeen)}</span></div><button class="small sky" onclick="pick('${id}')">Chat</button></div>`).join('') : '<p class="muted">No student has opened the student page yet.</p>';
 }
 function fillSelects() {
   const opts = '<option value="all">Everyone</option>' + Object.entries(students).map(([id, s]) => `<option value="${id}">${esc(s.name)}</option>`).join('');
@@ -229,12 +262,15 @@ function draw() {
 }
 function sendChat() { const t = $('chatIn').value.trim(); if (!t) return; db.ref('dirChat/' + sel).push({ from: 'teacher', name: 'Teacher', text: t, ts: TS }); $('chatIn').value = ''; }
 $('sendBtn').onclick = sendChat; $('chatIn').onkeydown = e => { if (e.key === 'Enter') sendChat(); };
+{ const qr = document.createElement('div'); qr.className = 'row'; qr.style.margin = '6px 0';
+  ['Please join now 🎥', 'Unmute your mic 🎤', 'Are you ready?', 'Well done! 🌟'].forEach(t => { const b = document.createElement('button'); b.className = 'small ghost'; b.textContent = t; b.onclick = () => { $('chatIn').value = t; sendChat(); }; qr.appendChild(b); });
+  $('chatIn').parentNode.before(qr); }
 openChat('all');
 
 /* video */
 const callUrl = r => (cfg.videoBase || DEFAULTS.videoBase) + encodeURIComponent(r) + '#userInfo.displayName=%22Teacher%22&config.prejoinPageEnabled=false';
-$('callOne').onclick = () => { if (sel === 'all') return toast('Select one student first'); const room = 'MathCloud-' + sel + '-' + Math.random().toString(36).slice(2, 7); db.ref('dirCall/' + sel).set({ id: uid(), ts: TS, room }); window.open(callUrl(room), '_blank', 'noopener'); toast('Calling ' + students[sel].name + '…'); };
-$('callAll').onclick = () => { const room = cfg.classRoom + '-' + localDate(); db.ref('dirCall/all').set({ id: uid(), ts: TS, room }); window.open(callUrl(room), '_blank', 'noopener'); toast('Calling the whole class…'); };
+$('callOne').onclick = () => { if (sel === 'all') return toast('Select one student first'); const room = 'MathCloud-' + sel + '-' + Math.random().toString(36).slice(2, 7); lastCall = uid(); db.ref('dirCall/' + sel).set({ id: lastCall, ts: TS, room }); renderCalls(); window.open(callUrl(room), '_blank', 'noopener'); toast(fresh(students[sel]) ? 'Calling ' + students[sel].name + '…' : students[sel].name + ' is offline. The call will ring as soon as the laptop is on.'); };
+$('callAll').onclick = () => { const room = cfg.classRoom + '-' + localDate(); lastCall = uid(); db.ref('dirCall/all').set({ id: lastCall, ts: TS, room }); renderCalls(); window.open(callUrl(room), '_blank', 'noopener'); toast('Calling the whole class…'); };
 
 /* settings */
 $('cfgBtn').onclick = () => db.ref('dirConfig').set({ voiceRate: +$('cRate').value || 0.9, encourageMins: +$('cEnc').value || 0, classRoom: $('cRoom').value.trim() || DEFAULTS.classRoom, videoBase: $('cBase').value.trim() || DEFAULTS.videoBase, lockUntilReady: $('cLock').checked }).then(() => toast('Settings saved ✓'));
