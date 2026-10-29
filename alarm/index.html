@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>My Class Directory</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg">
+<meta name="theme-color" content="#1b1f4b">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="soundBar" class="hidden" style="position:fixed;top:0;left:0;right:0;z-index:70;background:var(--coral);color:#fff;text-align:center;padding:10px;font-weight:600">🔇 Tap anywhere once to turn on the sound</div>
+<!-- START SCREEN -->
+<div id="start" class="overlay" style="background:var(--ink)">
+  <div class="card" style="text-align:center">
+    <div style="font-size:64px" class="ring">⏰</div>
+    <h1>Hello, friend!</h1>
+    <p>Type your name, then tap the big button. I will remind you when it is time for class and read everything out loud.</p>
+    <input id="nameIn" placeholder="Your name" autocomplete="given-name" maxlength="30" style="font-size:24px;text-align:center">
+    <p><button id="goBtn" class="green" style="font-size:26px;padding:16px 34px">▶ Start my day</button></p>
+    <p class="muted">Keep this page open. Turn your sound on 🔊</p>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div id="main" class="hidden">
+  <div class="top">
+    <div class="brand">Math<b>Cloud</b> Class Directory</div>
+    <div class="row"><span><span id="conDot" class="dot"></span><span id="whoAmI"></span></span><button class="ghost small" id="chgName">Change name</button></div>
+  </div>
+  <div class="wrap">
+    <div class="hero">
+      <div class="clock" id="clock">--:--</div>
+      <div id="dateLine" class="muted" style="color:#cdd3ff"></div>
+      <div id="nextLine" style="font-size:22px;margin-top:10px"></div>
+      <div id="cheerLine" class="cheer" style="color:var(--sun);margin-top:8px"></div>
+    </div>
+    <div class="grid">
+      <div>
+        <div class="panel">
+          <h2>📋 Today's activities</h2>
+          <div id="list"></div>
+        </div>
+      </div>
+      <div>
+        <div class="panel">
+          <h2>🎥 Class video</h2>
+          <p class="muted">Tap to join your teacher in the video class.</p>
+          <div class="row"><button class="green" id="joinBtn">Join video class</button><button class="ghost small" id="testBtn">🔊 Test sound</button></div>
+        </div>
+        <div class="panel">
+          <h2>💬 Talk to teacher <span id="badge" class="chip ready hidden">new</span></h2>
+          <div id="chat" class="chat"></div>
+          <div class="row" style="margin-top:8px"><input class="grow" id="chatIn" placeholder="Type a message…" maxlength="300"><button id="sendBtn" class="sky">Send</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ACTIVITY ALERT -->
+<div id="alert" class="overlay hidden" role="dialog" aria-live="assertive">
+  <div class="card">
+    <div class="row"><span style="font-size:54px" class="ring">🔔</span><span id="aTime" class="chip ready"></span><span id="aSpeak" class="chip hidden">🔊 Reading…</span></div>
+    <h1 id="aTitle"></h1>
+    <div id="aCheer" class="cheer"></div>
+    <div id="aInstr" class="instr"></div>
+    <div class="row">
+      <button id="aReady" class="green" style="font-size:22px">👍 I'm ready!</button>
+      <button id="aDone" class="sun hidden" style="font-size:22px">✅ I finished</button>
+      <button id="aRead" class="ghost">🔊 Read again</button>
+      <button id="aClose" class="ghost">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- TEACHER CALLING -->
+<div id="call" class="overlay hidden" role="dialog" aria-live="assertive">
+  <div class="card" style="text-align:center">
+    <div style="font-size:70px" class="ring">📹</div>
+    <h1 id="callTitle">Your teacher is calling!</h1>
+    <div class="row" style="justify-content:center"><button id="callJoin" class="green" style="font-size:26px;padding:16px 34px">Join now</button><button id="callNo" class="ghost">Not now</button></div>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script>
+const CHEERS = [
+ "You are doing great!","I believe in you!","Take a deep breath. You can do this!","Eyes on the screen, super star!",
+ "Every small step makes you stronger!","You are clever and brave!","Listen carefully, you are going to shine today!",
+ "Mistakes help us learn. Keep trying!","Sit up tall and smile. Let's go!","Your teacher is proud of you!",
+ "Focus power on! You've got this!","Wow, look how much you have learned!","Be kind, be curious, be awesome!"
+];
+const rand = a => a[Math.floor(Math.random() * a.length)];
+let me = JSON.parse(localStorage.getItem('dirMe') || 'null');
+let acts = {}, cfg = { ...DEFAULTS }, done = JSON.parse(localStorage.getItem('dirDone_' + localDate()) || '{}');
+let current = null, audioCtx = null, voice = null, alarmToken = 0, reminderT = null, cheerT = null, started = false;
+
+const qn = new URLSearchParams(location.search).get('name');
+if (qn && qn.trim()) { me = { id: slug(qn), name: qn.trim().slice(0, 30) }; localStorage.setItem('dirMe', JSON.stringify(me)); }
+let readyState = false;
+if (me) $('nameIn').value = me.name;
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+
+/* ---------- sound & voice ---------- */
+function pickVoice() {
+  const v = speechSynthesis.getVoices();
+  voice = v.find(x => /en/i.test(x.lang) && /(female|samantha|zira|aria|jenny|google uk english female|google us english)/i.test(x.name)) || v.find(x => /^en/i.test(x.lang)) || v[0] || null;
+}
+if ('speechSynthesis' in window) { pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
+function say(text) {
+  return new Promise(res => {
+    if (!('speechSynthesis' in window)) return res();
+    speechSynthesis.cancel();
+    const parts = String(text).replace(/\s+/g, ' ').match(/[^.!?\n]+[.!?]*/g) || [text];
+    let i = 0;
+    const next = () => {
+      if (i >= parts.length) return res();
+      const u = new SpeechSynthesisUtterance(parts[i++].trim());
+      if (voice) u.voice = voice;
+      u.rate = cfg.voiceRate; u.pitch = 1.1; u.volume = 1;
+      u.onend = next; u.onerror = next;
+      speechSynthesis.speak(u);
+    };
+    next();
+  });
+}
+function beep(freq, start, dur) {
+  const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+  o.type = 'square'; o.frequency.value = freq; o.connect(g); g.connect(audioCtx.destination);
+  g.gain.setValueAtTime(0.0001, audioCtx.currentTime + start);
+  g.gain.exponentialRampToValueAtTime(0.35, audioCtx.currentTime + start + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + start + dur);
+  o.start(audioCtx.currentTime + start); o.stop(audioCtx.currentTime + start + dur + 0.05);
+}
+function alarm(rounds = 3) {
+  const my = ++alarmToken;
+  if (!audioCtx) return Promise.resolve();
+  audioCtx.resume();
+  for (let r = 0; r < rounds; r++) { const b = r * 1.6; beep(880, b, .18); beep(1175, b + .25, .18); beep(880, b + .5, .18); beep(1175, b + .75, .18); }
+  if (navigator.vibrate) navigator.vibrate([300, 150, 300, 150, 300]);
+  return new Promise(res => setTimeout(() => res(my === alarmToken), rounds * 1600));
+}
+function ding() { if (audioCtx) { audioCtx.resume(); beep(1320, 0, .15); beep(1760, .18, .2); } }
+
+/* ---------- start ---------- */
+$('goBtn').onclick = () => begin(false);
+$('nameIn').onkeydown = e => { if (e.key === 'Enter') begin(false); };
+$('chgName').onclick = () => { localStorage.removeItem('dirMe'); location.href = location.pathname; };
+function checkAudio() { $('soundBar').classList.toggle('hidden', !!audioCtx && audioCtx.state === 'running'); }
+document.addEventListener('pointerdown', () => {
+  if (audioCtx) audioCtx.resume().then(checkAudio);
+  try { if ('Notification' in window && Notification.permission === 'default') Notification.requestPermission(); } catch (e) {}
+}, true);
+async function begin(manual) {
+  const auto = manual === 'auto';
+  const name = auto && me ? me.name : $('nameIn').value.trim();
+  if (!name) { $('nameIn').focus(); return; }
+  me = { id: slug(name), name }; localStorage.setItem('dirMe', JSON.stringify(me));
+  audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+  audioCtx.resume(); speechSynthesis && speechSynthesis.speak(new SpeechSynthesisUtterance(''));
+  try { if ('Notification' in window && Notification.permission === 'default') Notification.requestPermission(); } catch (e) {}
+  try { if (navigator.wakeLock) { await navigator.wakeLock.request('screen'); document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') navigator.wakeLock.request('screen').catch(() => {}); }); } } catch (e) {}
+  $('start').classList.add('hidden'); $('main').classList.remove('hidden');
+  $('whoAmI').textContent = name;
+  if (!started) { started = true; attach(); }
+  say(`Hello ${name}! Welcome to class. ${rand(CHEERS)}`);
+  setTimeout(checkAudio, 800);
+}
+
+function attach() {
+  const meRef = db.ref('dirStudents/' + me.id);
+  db.ref('.info/connected').on('value', s => {
+    $('conDot').classList.toggle('on', !!s.val());
+    if (s.val()) { meRef.onDisconnect().update({ online: false, lastSeen: TS }); meRef.update({ name: me.name, online: true, lastSeen: TS, device: navigator.userAgent.slice(0, 70) }); }
+  });
+  db.ref('dirConfig').on('value', s => { cfg = { ...DEFAULTS, ...(s.val() || {}) }; startCheerTimer(); });
+  db.ref('dirActivities').on('value', s => { acts = s.val() || {}; renderList(); });
+  listenFresh('dirCommands/' + me.id, onCommand); listenFresh('dirCommands/all', onCommand);
+  listenFresh('dirCall/' + me.id, onCall); listenFresh('dirCall/all', onCall);
+  listenChat();
+  // a Web Worker timer is not slowed down when the window is minimised or in the background
+  let n5 = 0;
+  try { const wk = new Worker(URL.createObjectURL(new Blob(['setInterval(()=>postMessage(1),1000)']))); wk.onmessage = () => { clockTick(); if (++n5 % 5 === 0) tick(); }; }
+  catch (e) { setInterval(clockTick, 1000); setInterval(tick, 5000); }
+  if (navigator.locks) navigator.locks.request('dir-keepalive', () => new Promise(() => {}));
+  setInterval(() => meRef.update({ online: true, lastSeen: TS }), 60000);
+  // keep the student on track: if an alert is still not accepted and they switch away, nag again
+  setInterval(() => {
+    if (!$('alert').classList.contains('hidden') && !readyState && (document.hidden || !document.hasFocus())) {
+      alarm(1); notify(current || { title: 'Time to start!' }); try { window.focus(); } catch (e) {}
+    }
+  }, 20000);
+  clockTick(); tick();
+}
+
+/* fresh-event listener: only fires for events created in the last 2 minutes and not handled before */
+function listenFresh(path, fn) {
+  db.ref(path).on('value', s => {
+    const v = s.val(); if (!v || !v.id) return;
+    const key = 'dirSeen_' + path; if (localStorage.getItem(key) === v.id) return;
+    if (serverNow() - (v.ts || 0) > 120000) return;
+    localStorage.setItem(key, v.id); fn(v);
+  });
+}
+
+/* ---------- schedule ---------- */
+const mine = a => a.enabled !== false && (!a.target || a.target === 'all' || a.target === me.id);
+const today = a => a.date ? a.date === localDate() : (!a.days || !a.days.length || a.days.includes(new Date().getDay()));
+function todays() { return Object.entries(acts).map(([id, a]) => ({ ...a, id })).filter(a => mine(a) && today(a)).sort((a, b) => (a.time || '').localeCompare(b.time || '')); }
+function tick() {
+  const n = new Date(), d = localDate(), nowMin = n.getHours() * 60 + n.getMinutes();
+  todays().forEach(a => {
+    if (!a.time) return;
+    const [hh, mm] = a.time.split(':').map(Number), diff = nowMin - (hh * 60 + mm);
+    const k = `dirFired_${a.id}_${d}_${a.time}`;
+    // fires on time, or up to 5 minutes late (for example when the laptop was switched on late)
+    if (diff >= 0 && diff <= 5 && !localStorage.getItem(k) && !done[a.id]) { localStorage.setItem(k, '1'); runAlert(a, false); }
+  });
+}
+function clockTick() {
+  const n = new Date();
+  $('clock').textContent = fmt12(hhmm(n)); $('dateLine').textContent = n.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' });
+  const nxt = todays().find(a => a.time > hhmm(n) && !done[a.id]);
+  if (nxt) { const [h, m] = nxt.time.split(':').map(Number); const mins = h * 60 + m - (n.getHours() * 60 + n.getMinutes()); $('nextLine').innerHTML = `Next: <b>${esc(nxt.title)}</b> at ${fmt12(nxt.time)} (in ${mins >= 60 ? Math.floor(mins / 60) + ' h ' : ''}${mins % 60} min)`; }
+  else $('nextLine').textContent = todays().length ? 'All done for today. Great work! 🌟' : 'No activity planned right now. Enjoy your break!';
+}
+function renderList() {
+  const l = todays(), t = hhmm();
+  $('list').innerHTML = l.length ? l.map(a => `<div class="act ${current && current.id === a.id ? 'now' : ''}"><div class="t">${fmt12(a.time)}</div><div style="flex:1"><b>${esc(a.title)}</b><br>${done[a.id] ? '<span class="chip done">✓ Done</span>' : a.time <= t ? '<span class="chip ready">Time passed</span>' : '<span class="chip">Coming up</span>'}</div><button class="small sky" onclick="openAct('${a.id}')">Open</button></div>`).join('') : '<p class="muted">Nothing planned yet. Your teacher will add activities here.</p>';
+  clockTick();
+}
+window.openAct = id => { const a = acts[id]; if (a) runAlert({ ...a, id }, false, true); };
+
+/* ---------- alert ---------- */
+function setStatus(state) {
+  if (!current || !current.id) return;
+  db.ref(`dirStatus/${current.id}/${me.id}`).set({ name: me.name, state, date: localDate(), ts: TS });
+}
+function lockClose() { $('aClose').classList.toggle('hidden', cfg.lockUntilReady !== false && !readyState); }
+async function runAlert(a, byTeacher, quiet) {
+  current = a; $('aTitle').textContent = a.title || 'Activity'; $('aInstr').textContent = a.instructions || '';
+  $('aTime').textContent = byTeacher ? 'From your teacher, right now' : (a.time ? fmt12(a.time) : 'Now');
+  $('aCheer').textContent = rand(CHEERS); $('aReady').classList.remove('hidden'); $('aDone').classList.add('hidden');
+  $('alert').classList.remove('hidden'); renderList();
+  readyState = false; lockClose();
+  setStatus('alerted'); notify(a);
+  flashTitle('🔔 ' + (a.title || 'Time to start!'));
+  if (!quiet) { const ok = await alarm(3); if (!ok) return; }
+  await readAloud(a, byTeacher);
+  clearInterval(reminderT);
+  reminderT = setInterval(() => { if (!$('alert').classList.contains('hidden') && !$('aDone').offsetParent) { alarm(1).then(() => say(`Hey ${me.name}! Tap the green button when you are ready. ${rand(CHEERS)}`)); } }, 120000);
+}
+async function readAloud(a, byTeacher) {
+  $('aSpeak').classList.remove('hidden');
+  const txt = `Hello ${me.name}! ${byTeacher ? 'Your teacher has a message for you.' : 'It is time for ' + a.title + '.'} ${$('aCheer').textContent} Here are your instructions. ${a.instructions || ''} ${a.instructions ? 'Now you know what to do.' : ''} ${rand(CHEERS)} Tap the green button when you are ready.`;
+  await say(txt); $('aSpeak').classList.add('hidden');
+}
+$('aRead').onclick = () => current && readAloud(current, false);
+$('aReady').onclick = () => { readyState = true; lockClose(); speechSynthesis.cancel(); alarmToken++; setStatus('ready'); $('aReady').classList.add('hidden'); $('aDone').classList.remove('hidden'); $('aSpeak').classList.add('hidden'); say(`Wonderful, ${me.name}! Let's begin. ${rand(CHEERS)}`); clearInterval(reminderT); };
+$('aDone').onclick = () => { setStatus('done'); if (current && current.id) { done[current.id] = 1; localStorage.setItem('dirDone_' + localDate(), JSON.stringify(done)); } $('alert').classList.add('hidden'); clearInterval(reminderT); say(`Amazing work, ${me.name}! I am so proud of you!`); renderList(); };
+$('aClose').onclick = () => { speechSynthesis.cancel(); alarmToken++; clearInterval(reminderT); $('alert').classList.add('hidden'); current = null; renderList(); };
+
+function onCommand(c) {
+  if (c.type === 'stop') { $('aClose').onclick(); return; }
+  runAlert({ id: c.activityId || null, title: c.title, instructions: c.instructions, time: null }, true);
+}
+function notify(a) {
+  try { window.focus(); } catch (e) {}
+  if (!document.hidden && document.hasFocus()) return;
+  try {
+    if ('Notification' in window && Notification.permission === 'granted') {
+      const opts = { body: (a.instructions || 'Tap to open your class page').slice(0, 140), icon: 'icon.svg', requireInteraction: true, tag: 'dir-alert', renotify: true, vibrate: [300, 150, 300] };
+      const title = '⏰ ' + (a.title || 'Time to start!');
+      if ('serviceWorker' in navigator) navigator.serviceWorker.ready.then(r => r.showNotification(title, opts)).catch(() => {});
+      else { const n = new Notification(title, opts); n.onclick = () => { window.focus(); n.close(); }; }
+    }
+  } catch (e) {}
+}
+let flashT; function flashTitle(msg) { clearInterval(flashT); const orig = 'My Class Directory'; let on = false; flashT = setInterval(() => { document.title = on ? orig : msg; on = !on; if (!document.hidden && $('alert').classList.contains('hidden')) { clearInterval(flashT); document.title = orig; } }, 900); }
+
+/* ---------- encouragement ---------- */
+function startCheerTimer() {
+  clearInterval(cheerT); $('cheerLine').textContent = rand(CHEERS);
+  cheerT = setInterval(() => {
+    const l = rand(CHEERS); $('cheerLine').textContent = l;
+    if (cfg.encourageMins > 0 && current && !$('aDone').classList.contains('hidden') && !speechSynthesis.speaking) {
+      cheerCount = (window.cheerCount = (window.cheerCount || 0) + 1);
+      if (cheerCount % Math.max(1, Math.round(cfg.encourageMins)) === 0) say(l);
+    }
+  }, 60000);
+}
+
+/* ---------- video ---------- */
+let pendingRoom = null;
+const roomUrl = r => (cfg.videoBase || DEFAULTS.videoBase) + encodeURIComponent(r) + '#userInfo.displayName=%22' + encodeURIComponent(me.name) + '%22&config.prejoinPageEnabled=false';
+function joinRoom(r) { window.open(roomUrl(r), '_blank', 'noopener'); }
+$('joinBtn').onclick = () => joinRoom(pendingRoom || cfg.classRoom || 'MathCloudClass');
+function onCall(c) {
+  pendingRoom = c.room; $('callTitle').textContent = 'Your teacher is calling!';
+  $('call').classList.remove('hidden');
+  alarm(2).then(() => say(`${me.name}, your teacher is calling you. Tap the green button to join.`));
+  notify({ title: 'Your teacher is calling', instructions: 'Tap to join the video class' });
+}
+$('callJoin').onclick = () => { $('call').classList.add('hidden'); alarmToken++; speechSynthesis.cancel(); joinRoom(pendingRoom || cfg.classRoom); };
+$('callNo').onclick = () => { $('call').classList.add('hidden'); alarmToken++; speechSynthesis.cancel(); };
+$('testBtn').onclick = () => { alarm(1).then(() => say(`Hello ${me.name}! Sound is working. ${rand(CHEERS)}`)); };
+
+/* ---------- chat ---------- */
+let msgs = {}, chatReady = 0;
+function listenChat() {
+  chatReady = serverNow();
+  ['dirChat/' + me.id, 'dirChat/all'].forEach(p => {
+    db.ref(p).limitToLast(40).on('child_added', s => {
+      const m = s.val(); msgs[p + '/' + s.key] = m; drawChat();
+      if (m.from === 'teacher' && m.ts > chatReady) { ding(); $('badge').classList.remove('hidden'); say('Message from your teacher. ' + m.text); }
+    });
+  });
+}
+function drawChat() {
+  const l = Object.values(msgs).sort((a, b) => a.ts - b.ts);
+  $('chat').innerHTML = l.length ? l.map(m => `<div class="msg ${m.from === 'student' ? 'me' : ''}"><small>${m.from === 'student' ? 'Me' : 'Teacher'}</small>${esc(m.text)}</div>`).join('') : '<p class="muted">Say hello to your teacher 👋</p>';
+  $('chat').scrollTop = 1e6;
+}
+function sendChat() {
+  const t = $('chatIn').value.trim(); if (!t) return;
+  db.ref('dirChat/' + me.id).push({ from: 'student', name: me.name, text: t, ts: TS });
+  db.ref('dirStudents/' + me.id + '/lastMsg').set({ text: t.slice(0, 80), ts: TS });
+  $('chatIn').value = ''; $('badge').classList.add('hidden');
+}
+if (me) begin('auto');
+$('sendBtn').onclick = sendChat; $('chatIn').onkeydown = e => { if (e.key === 'Enter') sendChat(); };
+</script>
+<script>
+/* =========================================
+   WEBSITE PROTECTION
+   Blocks common browser shortcuts/devtools
+   ========================================= */
+
+(function () {
+    "use strict";
+
+    // Disable right-click
+    document.addEventListener("contextmenu", function (e) {
+        e.preventDefault();
+        return false;
+    });
+
+    // Disable common keyboard shortcuts
+    document.addEventListener("keydown", function (e) {
+        const key = e.key.toLowerCase();
+
+        // F12
+        if (e.key === "F12") {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+        }
+
+        // Ctrl shortcuts
+        if (e.ctrlKey) {
+
+            // Ctrl + U = View Source
+            if (key === "u") {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+
+            // Ctrl + S = Save Page
+            if (key === "s") {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+
+            // Ctrl + P = Print
+            if (key === "p") {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+
+            // Ctrl + C = Copy
+            if (key === "c") {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+
+            // Ctrl + X = Cut
+            if (key === "x") {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+
+            // Ctrl + A = Select All
+            if (key === "a") {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+
+            // Ctrl + Shift + I = Developer Tools
+            if (e.shiftKey && key === "i") {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+
+            // Ctrl + Shift + J = Console
+            if (e.shiftKey && key === "j") {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+
+            // Ctrl + Shift + C = Inspect Element
+            if (e.shiftKey && key === "c") {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+        }
+
+        // F1 / F3 / F6 / F10 / F11
+        if (
+            e.key === "F1" ||
+            e.key === "F3" ||
+            e.key === "F6" ||
+            e.key === "F10" ||
+            e.key === "F11"
+        ) {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+        }
+
+        // Shift + F10 = Context Menu
+        if (e.shiftKey && e.key === "F10") {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+        }
+    }, true);
+
+    // Disable text selection
+    document.addEventListener("selectstart", function (e) {
+        e.preventDefault();
+        return false;
+    });
+
+    // Disable dragging images/elements
+    document.addEventListener("dragstart", function (e) {
+        e.preventDefault();
+        return false;
+    });
+
+    // Disable copy
+    document.addEventListener("copy", function (e) {
+        e.preventDefault();
+        return false;
+    });
+
+    // Disable cut
+    document.addEventListener("cut", function (e) {
+        e.preventDefault();
+        return false;
+    });
+
+    // Disable paste if desired
+    document.addEventListener("paste", function (e) {
+        // Comment this section out if users need to paste
+        e.preventDefault();
+        return false;
+    });
+
+})();
+</script>
+</body>
+</html>
