@@ -67,6 +67,7 @@
     <h1 id="aTitle"></h1>
     <div id="aCheer" class="cheer"></div>
     <div id="aInstr" class="instr"></div>
+    <p id="aLinkWrap" class="hidden"><a id="aLink" href="#" target="_blank" rel="noopener" style="display:inline-block;background:var(--sky);color:var(--ink);font-weight:700;font-size:22px;padding:14px 24px;border-radius:14px;text-decoration:none">🔗 Open my activity</a></p>
     <div class="row">
       <button id="aReady" class="green" style="font-size:22px">👍 I'm ready!</button>
       <button id="aDone" class="sun hidden" style="font-size:22px">✅ I finished</button>
@@ -95,6 +96,7 @@ const CHEERS = [
  "Mistakes help us learn. Keep trying!","Sit up tall and smile. Let's go!","Your teacher is proud of you!",
  "Focus power on! You've got this!","Wow, look how much you have learned!","Be kind, be curious, be awesome!"
 ];
+const safeLink = v => { v = String(v || '').trim(); return /^https?:\/\//i.test(v) ? v : ''; };
 const rand = a => a[Math.floor(Math.random() * a.length)];
 let me = JSON.parse(localStorage.getItem('dirMe') || 'null');
 let acts = {}, cfg = { ...DEFAULTS }, done = JSON.parse(localStorage.getItem('dirDone_' + localDate()) || '{}');
@@ -231,7 +233,7 @@ function clockTick() {
 }
 function renderList() {
   const l = todays(), t = hhmm();
-  $('list').innerHTML = l.length ? l.map(a => `<div class="act ${current && current.id === a.id ? 'now' : ''}"><div class="t">${fmt12(a.time)}</div><div style="flex:1"><b>${esc(a.title)}</b><br>${done[a.id] ? '<span class="chip done">✓ Done</span>' : a.time <= t ? '<span class="chip ready">Time passed</span>' : '<span class="chip">Coming up</span>'}</div><button class="small sky" onclick="openAct('${a.id}')">Open</button></div>`).join('') : '<p class="muted">Nothing planned yet. Your teacher will add activities here.</p>';
+  $('list').innerHTML = l.length ? l.map(a => `<div class="act ${current && current.id === a.id ? 'now' : ''}"><div class="t">${fmt12(a.time)}</div><div style="flex:1"><b>${esc(a.title)}</b><br>${done[a.id] ? '<span class="chip done">✓ Done</span>' : a.time <= t ? '<span class="chip ready">Time passed</span>' : '<span class="chip">Coming up</span>'}</div>${safeLink(a.link) ? `<a class="small" href="${esc(safeLink(a.link))}" target="_blank" rel="noopener" style="background:var(--grass);color:#fff;text-decoration:none;font-weight:600;border-radius:10px;padding:8px 12px">🔗 Link</a>` : ''}<button class="small sky" onclick="openAct('${a.id}')">Open</button></div>`).join('') : '<p class="muted">Nothing planned yet. Your teacher will add activities here.</p>';
   clockTick();
 }
 window.openAct = id => { const a = acts[id]; if (a) runAlert({ ...a, id }, false, true); };
@@ -244,6 +246,7 @@ function setStatus(state) {
 function lockClose() { $('aClose').classList.toggle('hidden', cfg.lockUntilReady !== false && !readyState); }
 async function runAlert(a, byTeacher, quiet) {
   current = a; $('aTitle').textContent = a.title || 'Activity'; $('aInstr').textContent = a.instructions || '';
+  const lk = safeLink(a.link); $('aLinkWrap').classList.toggle('hidden', !lk); $('aLink').href = lk || '#';
   $('aTime').textContent = byTeacher ? 'From your teacher, right now' : (a.time ? fmt12(a.time) : 'Now');
   $('aCheer').textContent = rand(CHEERS); $('aReady').classList.remove('hidden'); $('aDone').classList.add('hidden');
   $('alert').classList.remove('hidden'); renderList();
@@ -257,7 +260,7 @@ async function runAlert(a, byTeacher, quiet) {
 }
 async function readAloud(a, byTeacher) {
   $('aSpeak').classList.remove('hidden');
-  const txt = `Hello ${me.name}! ${byTeacher ? 'Your teacher has a message for you.' : 'It is time for ' + a.title + '.'} ${$('aCheer').textContent} Here are your instructions. ${a.instructions || ''} ${a.instructions ? 'Now you know what to do.' : ''} ${rand(CHEERS)} Tap the green button when you are ready.`;
+  const txt = `Hello ${me.name}! ${byTeacher ? 'Your teacher has a message for you.' : 'It is time for ' + a.title + '.'} ${$('aCheer').textContent} Here are your instructions. ${a.instructions || ''} ${a.instructions ? 'Now you know what to do.' : ''} ${safeLink(a.link) ? 'Tap the blue button to open your activity.' : ''} ${rand(CHEERS)} Tap the green button when you are ready.`;
   await say(txt); $('aSpeak').classList.add('hidden');
 }
 $('aRead').onclick = () => current && readAloud(current, false);
@@ -267,7 +270,7 @@ $('aClose').onclick = () => { speechSynthesis.cancel(); alarmToken++; clearInter
 
 function onCommand(c) {
   if (c.type === 'stop') { $('aClose').onclick(); return; }
-  runAlert({ id: c.activityId || null, title: c.title, instructions: c.instructions, time: null }, true);
+  runAlert({ id: c.activityId || null, title: c.title, instructions: c.instructions, link: c.link, time: null }, true);
 }
 function notify(a) {
   try { window.focus(); } catch (e) {}
@@ -334,153 +337,6 @@ function sendChat() {
 }
 if (me) begin('auto');
 $('sendBtn').onclick = sendChat; $('chatIn').onkeydown = e => { if (e.key === 'Enter') sendChat(); };
-</script>
-<script>
-/* =========================================
-   WEBSITE PROTECTION
-   Blocks common browser shortcuts/devtools
-   ========================================= */
-
-(function () {
-    "use strict";
-
-    // Disable right-click
-    document.addEventListener("contextmenu", function (e) {
-        e.preventDefault();
-        return false;
-    });
-
-    // Disable common keyboard shortcuts
-    document.addEventListener("keydown", function (e) {
-        const key = e.key.toLowerCase();
-
-        // F12
-        if (e.key === "F12") {
-            e.preventDefault();
-            e.stopPropagation();
-            return false;
-        }
-
-        // Ctrl shortcuts
-        if (e.ctrlKey) {
-
-            // Ctrl + U = View Source
-            if (key === "u") {
-                e.preventDefault();
-                e.stopPropagation();
-                return false;
-            }
-
-            // Ctrl + S = Save Page
-            if (key === "s") {
-                e.preventDefault();
-                e.stopPropagation();
-                return false;
-            }
-
-            // Ctrl + P = Print
-            if (key === "p") {
-                e.preventDefault();
-                e.stopPropagation();
-                return false;
-            }
-
-            // Ctrl + C = Copy
-            if (key === "c") {
-                e.preventDefault();
-                e.stopPropagation();
-                return false;
-            }
-
-            // Ctrl + X = Cut
-            if (key === "x") {
-                e.preventDefault();
-                e.stopPropagation();
-                return false;
-            }
-
-            // Ctrl + A = Select All
-            if (key === "a") {
-                e.preventDefault();
-                e.stopPropagation();
-                return false;
-            }
-
-            // Ctrl + Shift + I = Developer Tools
-            if (e.shiftKey && key === "i") {
-                e.preventDefault();
-                e.stopPropagation();
-                return false;
-            }
-
-            // Ctrl + Shift + J = Console
-            if (e.shiftKey && key === "j") {
-                e.preventDefault();
-                e.stopPropagation();
-                return false;
-            }
-
-            // Ctrl + Shift + C = Inspect Element
-            if (e.shiftKey && key === "c") {
-                e.preventDefault();
-                e.stopPropagation();
-                return false;
-            }
-        }
-
-        // F1 / F3 / F6 / F10 / F11
-        if (
-            e.key === "F1" ||
-            e.key === "F3" ||
-            e.key === "F6" ||
-            e.key === "F10" ||
-            e.key === "F11"
-        ) {
-            e.preventDefault();
-            e.stopPropagation();
-            return false;
-        }
-
-        // Shift + F10 = Context Menu
-        if (e.shiftKey && e.key === "F10") {
-            e.preventDefault();
-            e.stopPropagation();
-            return false;
-        }
-    }, true);
-
-    // Disable text selection
-    document.addEventListener("selectstart", function (e) {
-        e.preventDefault();
-        return false;
-    });
-
-    // Disable dragging images/elements
-    document.addEventListener("dragstart", function (e) {
-        e.preventDefault();
-        return false;
-    });
-
-    // Disable copy
-    document.addEventListener("copy", function (e) {
-        e.preventDefault();
-        return false;
-    });
-
-    // Disable cut
-    document.addEventListener("cut", function (e) {
-        e.preventDefault();
-        return false;
-    });
-
-    // Disable paste if desired
-    document.addEventListener("paste", function (e) {
-        // Comment this section out if users need to paste
-        e.preventDefault();
-        return false;
-    });
-
-})();
 </script>
 </body>
 </html>
