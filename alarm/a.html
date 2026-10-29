@@ -28,6 +28,7 @@
         <label for="fTitle">Title</label><input id="fTitle" placeholder="e.g. Open Microsoft Word and type your name">
         <label for="fInstr">Instructions (the student hears these read aloud)</label>
         <textarea id="fInstr" placeholder="Step 1: ... &#10;Step 2: ..."></textarea>
+        <label for="fLink">Activity link (optional, the student taps it to open the activity)</label><input id="fLink" type="url" placeholder="https://...">
         <div class="row">
           <div class="grow"><label for="fTime">Time</label><input type="time" id="fTime" value="09:00"></div>
           <div class="grow"><label for="fDate">One date only (optional)</label><input type="date" id="fDate"></div>
@@ -67,6 +68,7 @@
           <label for="qTitle">Or send a quick message</label>
           <input id="qTitle" placeholder="Title, e.g. Class is starting!">
           <textarea id="qInstr" style="min-height:80px" placeholder="What should they do right now?"></textarea>
+          <input id="qLink" type="url" placeholder="Link (optional) https://..." style="margin-top:8px">
           <button class="sun" id="quickBtn" style="margin-top:8px">📣 Send quick alert</button>
         </div>
       </div>
@@ -131,6 +133,7 @@
 <script>
 let acts = {}, students = {}, status = {}, cfg = { ...DEFAULTS }, sel = 'all', chatRefs = [], msgs = {};
 const toast = m => { const t = $('toast'); t.textContent = m; t.classList.remove('hidden'); clearTimeout(toast.h); toast.h = setTimeout(() => t.classList.add('hidden'), 2400); };
+const fixLink = v => { v = (v || '').trim(); if (!v) return ''; return /^https?:\/\//i.test(v) ? v : 'https://' + v; };
 const uid = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
 
 /* sign in (only the account created by setup.html is accepted) */
@@ -161,7 +164,7 @@ db.ref('dirConfig').on('value', s => { cfg = { ...DEFAULTS, ...(s.val() || {}) }
 
 /* activities */
 function readForm() {
-  return { title: $('fTitle').value.trim(), instructions: $('fInstr').value.trim(), time: $('fTime').value, date: $('fDate').value || null,
+  return { title: $('fTitle').value.trim(), instructions: $('fInstr').value.trim(), link: fixLink($('fLink').value), time: $('fTime').value, date: $('fDate').value || null,
     days: [...document.querySelectorAll('#fDays input:checked')].map(i => +i.value), target: $('fTarget').value || 'all', enabled: $('fOn').checked };
 }
 $('saveBtn').onclick = () => {
@@ -169,13 +172,13 @@ $('saveBtn').onclick = () => {
   const id = $('fId').value || db.ref('dirActivities').push().key; a.updatedAt = TS;
   db.ref('dirActivities/' + id).update(a).then(() => { toast('Saved ✓'); clearForm(); });
 };
-function clearForm() { $('fId').value = ''; $('fTitle').value = ''; $('fInstr').value = ''; $('fDate').value = ''; $('fTime').value = '09:00'; $('fOn').checked = true; $('fTarget').value = 'all'; document.querySelectorAll('#fDays input').forEach(i => i.checked = false); $('formTitle').textContent = 'New activity'; }
+function clearForm() { $('fId').value = ''; $('fTitle').value = ''; $('fInstr').value = ''; $('fLink').value = ''; $('fDate').value = ''; $('fTime').value = '09:00'; $('fOn').checked = true; $('fTarget').value = 'all'; document.querySelectorAll('#fDays input').forEach(i => i.checked = false); $('formTitle').textContent = 'New activity'; }
 $('clearBtn').onclick = clearForm;
 $('previewBtn').onclick = () => { const a = readForm(); speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(`It is time for ${a.title}. ${a.instructions}`); u.rate = cfg.voiceRate; speechSynthesis.speak(u); };
-window.editAct = id => { const a = acts[id]; $('fId').value = id; $('fTitle').value = a.title; $('fInstr').value = a.instructions || ''; $('fTime').value = a.time; $('fDate').value = a.date || ''; $('fOn').checked = a.enabled !== false; $('fTarget').value = a.target || 'all'; document.querySelectorAll('#fDays input').forEach(i => i.checked = (a.days || []).includes(+i.value)); $('formTitle').textContent = 'Edit activity'; scrollTo({ top: 0, behavior: 'smooth' }); };
+window.editAct = id => { const a = acts[id]; $('fId').value = id; $('fTitle').value = a.title; $('fInstr').value = a.instructions || ''; $('fLink').value = a.link || ''; $('fTime').value = a.time; $('fDate').value = a.date || ''; $('fOn').checked = a.enabled !== false; $('fTarget').value = a.target || 'all'; document.querySelectorAll('#fDays input').forEach(i => i.checked = (a.days || []).includes(+i.value)); $('formTitle').textContent = 'Edit activity'; scrollTo({ top: 0, behavior: 'smooth' }); };
 window.delAct = id => { if (confirm('Delete this activity?')) { db.ref('dirActivities/' + id).remove(); db.ref('dirStatus/' + id).remove(); } };
 window.togAct = (id, v) => db.ref('dirActivities/' + id + '/enabled').set(v);
-window.launchAct = id => { $('lAct').value = id; send(targetOf('lTarget'), { activityId: id, title: acts[id].title, instructions: acts[id].instructions || '' }); };
+window.launchAct = id => { $('lAct').value = id; send(targetOf('lTarget'), { activityId: id, title: acts[id].title, instructions: acts[id].instructions || '', link: acts[id].link || '' }); };
 function renderActs() {
   const l = Object.entries(acts).sort((a, b) => (a[1].time || '').localeCompare(b[1].time || ''));
   const today = localDate();
@@ -183,7 +186,7 @@ function renderActs() {
     const st = Object.values(status[id] || {}).filter(x => x.date === today);
     const chips = st.map(x => `<span class="chip ${x.state === 'done' ? 'done' : x.state}">${esc(x.name)}: ${x.state}</span>`).join(' ');
     const who = !a.target || a.target === 'all' ? 'Everyone' : (students[a.target] ? students[a.target].name : a.target);
-    return `<div class="act" style="flex-wrap:wrap"><div class="t">${fmt12(a.time)}</div><div style="flex:1;min-width:160px"><b>${esc(a.title)}</b>${a.enabled === false ? ' <span class="chip">off</span>' : ''}<br><span class="muted">${a.date ? a.date : (a.days && a.days.length ? a.days.map(d => DAYS[d]).join(', ') : 'Every day')} · ${esc(who)}</span><br>${chips}</div>
+    return `<div class="act" style="flex-wrap:wrap"><div class="t">${fmt12(a.time)}</div><div style="flex:1;min-width:160px"><b>${esc(a.title)}</b>${a.link ? ' 🔗' : ''}${a.enabled === false ? ' <span class="chip">off</span>' : ''}<br><span class="muted">${a.date ? a.date : (a.days && a.days.length ? a.days.map(d => DAYS[d]).join(', ') : 'Every day')} · ${esc(who)}</span><br>${chips}</div>
       <div class="row"><button class="small coral" onclick="launchAct('${id}')">▶ Now</button><button class="small sky" onclick="editAct('${id}')">Edit</button><button class="small ghost" onclick="togAct('${id}',${a.enabled === false})">${a.enabled === false ? 'Turn on' : 'Turn off'}</button><button class="small ghost" onclick="delAct('${id}')">🗑</button></div></div>`;
   }).join('') : '<p class="muted">No activities yet. Fill in the form to add the first one.</p>';
 }
@@ -207,8 +210,8 @@ const targetOf = id => $(id).value || 'all';
 function send(target, payload) {
   db.ref('dirCommands/' + target).set({ id: uid(), ts: TS, type: 'alert', ...payload }).then(() => toast('Sent to ' + (target === 'all' ? 'everyone' : (students[target] || {}).name) + ' ✓'));
 }
-$('launchBtn').onclick = () => { const id = $('lAct').value; if (!id) return toast('Choose an activity'); send(targetOf('lTarget'), { activityId: id, title: acts[id].title, instructions: acts[id].instructions || '' }); };
-$('quickBtn').onclick = () => { const t = $('qTitle').value.trim(); if (!t) return toast('Add a title'); send(targetOf('lTarget'), { title: t, instructions: $('qInstr').value.trim() }); };
+$('launchBtn').onclick = () => { const id = $('lAct').value; if (!id) return toast('Choose an activity'); send(targetOf('lTarget'), { activityId: id, title: acts[id].title, instructions: acts[id].instructions || '', link: acts[id].link || '' }); };
+$('quickBtn').onclick = () => { const t = $('qTitle').value.trim(); if (!t) return toast('Add a title'); send(targetOf('lTarget'), { title: t, instructions: $('qInstr').value.trim(), link: fixLink($('qLink').value) }); };
 $('stopBtn').onclick = () => send(targetOf('lTarget'), { type: 'stop' });
 
 /* chat */
