@@ -190,7 +190,7 @@ function attach() {
   try { const wk = new Worker(URL.createObjectURL(new Blob(['setInterval(()=>postMessage(1),1000)']))); wk.onmessage = () => { clockTick(); if (++n5 % 5 === 0) tick(); }; }
   catch (e) { setInterval(clockTick, 1000); setInterval(tick, 5000); }
   if (navigator.locks) navigator.locks.request('dir-keepalive', () => new Promise(() => {}));
-  setInterval(() => meRef.update({ online: true, lastSeen: TS }), 60000);
+  setInterval(() => meRef.update({ online: true, lastSeen: TS }), 20000);
   // keep the student on track: if an alert is still not accepted and they switch away, nag again
   setInterval(() => {
     if (!$('alert').classList.contains('hidden') && !readyState && (document.hidden || !document.hasFocus())) {
@@ -201,11 +201,11 @@ function attach() {
 }
 
 /* fresh-event listener: only fires for events created in the last 2 minutes and not handled before */
-function listenFresh(path, fn) {
+function listenFresh(path, fn) {  // calls/alerts stay valid for 2 hours so a late-booting laptop still rings
   db.ref(path).on('value', s => {
     const v = s.val(); if (!v || !v.id) return;
     const key = 'dirSeen_' + path; if (localStorage.getItem(key) === v.id) return;
-    if (serverNow() - (v.ts || 0) > 120000) return;
+    if (serverNow() - (v.ts || 0) > (v.type === 'stop' ? 120000 : 7200000)) return;
     localStorage.setItem(key, v.id); fn(v);
   });
 }
@@ -221,7 +221,7 @@ function tick() {
     const [hh, mm] = a.time.split(':').map(Number), diff = nowMin - (hh * 60 + mm);
     const k = `dirFired_${a.id}_${d}_${a.time}`;
     // fires on time, or up to 5 minutes late (for example when the laptop was switched on late)
-    if (diff >= 0 && diff <= 5 && !localStorage.getItem(k) && !done[a.id]) { localStorage.setItem(k, '1'); runAlert(a, false); }
+    if (diff >= 0 && diff <= 120 && !localStorage.getItem(k) && !done[a.id]) { localStorage.setItem(k, '1'); runAlert(a, false); }
   });
 }
 function clockTick() {
@@ -252,7 +252,7 @@ async function runAlert(a, byTeacher, quiet) {
   $('alert').classList.remove('hidden'); renderList();
   readyState = false; lockClose();
   setStatus('alerted'); notify(a);
-  flashTitle('🔔 ' + (a.title || 'Time to start!'));
+  flashTitle('🔔 ' + (a.title || 'Time to start!') + ' – Class Directory');
   if (!quiet) { const ok = await alarm(3); if (!ok) return; }
   await readAloud(a, byTeacher);
   clearInterval(reminderT);
@@ -303,24 +303,30 @@ let pendingRoom = null;
 const roomUrl = r => (cfg.videoBase || DEFAULTS.videoBase) + encodeURIComponent(r) + '#userInfo.displayName=%22' + encodeURIComponent(me.name) + '%22&config.prejoinPageEnabled=false';
 function joinRoom(r) { window.open(roomUrl(r), '_blank', 'noopener'); }
 $('joinBtn').onclick = () => joinRoom(pendingRoom || cfg.classRoom || 'MathCloudClass');
+let pendingCall = null, callT = null;
+const ackCall = st => { if (pendingCall && me) db.ref('dirStatus/_calls/' + pendingCall + '/' + me.id).set({ name: me.name, state: st, ts: TS }); };
 function onCall(c) {
+  pendingCall = c.id; ackCall('ringing'); clearInterval(callT);
+  callT = setInterval(() => { if (!$('call').classList.contains('hidden')) { alarm(2).then(() => say(`${me.name}, your teacher is still calling you.`)); notify({ title: 'Your teacher is calling', instructions: 'Tap to join the video class' }); } }, 45000);
   pendingRoom = c.room; $('callTitle').textContent = 'Your teacher is calling!';
   $('call').classList.remove('hidden');
   alarm(2).then(() => say(`${me.name}, your teacher is calling you. Tap the green button to join.`));
   notify({ title: 'Your teacher is calling', instructions: 'Tap to join the video class' });
 }
-$('callJoin').onclick = () => { $('call').classList.add('hidden'); alarmToken++; speechSynthesis.cancel(); joinRoom(pendingRoom || cfg.classRoom); };
-$('callNo').onclick = () => { $('call').classList.add('hidden'); alarmToken++; speechSynthesis.cancel(); };
+$('callJoin').onclick = () => { ackCall('joined'); clearInterval(callT); $('call').classList.add('hidden'); alarmToken++; speechSynthesis.cancel(); joinRoom(pendingRoom || cfg.classRoom); };
+$('callNo').onclick = () => { ackCall('declined'); clearInterval(callT); $('call').classList.add('hidden'); alarmToken++; speechSynthesis.cancel(); };
 $('testBtn').onclick = () => { alarm(1).then(() => say(`Hello ${me.name}! Sound is working. ${rand(CHEERS)}`)); };
 
 /* ---------- chat ---------- */
 let msgs = {}, chatReady = 0;
 function listenChat() {
-  chatReady = serverNow();
+  if (!localStorage.getItem('dirChatRead')) localStorage.setItem('dirChatRead', Date.now());
+  chatReady = +localStorage.getItem('dirChatRead');
   ['dirChat/' + me.id, 'dirChat/all'].forEach(p => {
     db.ref(p).limitToLast(40).on('child_added', s => {
       const m = s.val(); msgs[p + '/' + s.key] = m; drawChat();
-      if (m.from === 'teacher' && m.ts > chatReady) { ding(); $('badge').classList.remove('hidden'); say('Message from your teacher. ' + m.text); }
+      if (m.from === 'teacher' && m.ts > chatReady) { ding(); $('badge').classList.remove('hidden'); say('Message from your teacher. ' + m.text); notify({ title: 'Message from your teacher', instructions: m.text }); }
+      if (m.from === 'teacher' && !document.hidden && document.hasFocus()) localStorage.setItem('dirChatRead', Math.max(+localStorage.getItem('dirChatRead') || 0, m.ts || 0));
     });
   });
 }
@@ -333,7 +339,7 @@ function sendChat() {
   const t = $('chatIn').value.trim(); if (!t) return;
   db.ref('dirChat/' + me.id).push({ from: 'student', name: me.name, text: t, ts: TS });
   db.ref('dirStudents/' + me.id + '/lastMsg').set({ text: t.slice(0, 80), ts: TS });
-  $('chatIn').value = ''; $('badge').classList.add('hidden');
+  $('chatIn').value = ''; $('badge').classList.add('hidden'); localStorage.setItem('dirChatRead', Date.now());
 }
 if (me) begin('auto');
 $('sendBtn').onclick = sendChat; $('chatIn').onkeydown = e => { if (e.key === 'Enter') sendChat(); };
